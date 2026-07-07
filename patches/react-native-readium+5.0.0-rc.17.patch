@@ -1,0 +1,41 @@
+diff --git a/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/HybridReadiumView.kt b/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/HybridReadiumView.kt
+index 3744f66..14cd81d 100644
+--- a/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/HybridReadiumView.kt
++++ b/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/HybridReadiumView.kt
+@@ -275,6 +275,14 @@ class HybridReadiumView(private val context: android.content.Context) : HybridRe
+       }
+     }
+ 
++    // Apply preferences BEFORE committing so the navigator factory receives
++    // scroll/columnCount on first load (not only via a late submitPreferences).
++    preferences?.let { prefs ->
++      if (frag is EpubReaderFragment) {
++        frag.updatePreferences(nitroPreferencesToEpub(prefs))
++      }
++    }
++
+     activity.supportFragmentManager
+       .beginTransaction()
+       .replace(hostView.id, frag, hostView.id.toString())
+diff --git a/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/reader/EpubReaderFragment.kt b/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/reader/EpubReaderFragment.kt
+index 5f34c4e..c65bec0 100644
+--- a/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/reader/EpubReaderFragment.kt
++++ b/node_modules/react-native-readium/android/src/main/java/com/reactnativereadium/reader/EpubReaderFragment.kt
+@@ -167,12 +167,12 @@ class EpubReaderFragment : VisualReaderFragment() {
+         val am = activity.getSystemService(AppCompatActivity.ACCESSIBILITY_SERVICE) as AccessibilityManager
+         isExploreByTouchEnabled = am.isTouchExplorationEnabled
+ 
+-        userPreferences = if (isExploreByTouchEnabled) {
+-            userPreferences.plus(EpubPreferences(scroll = true))
+-        } else {
+-            userPreferences.plus(EpubPreferences(scroll = null))
++        if (isExploreByTouchEnabled) {
++            userPreferences = userPreferences.plus(EpubPreferences(scroll = true))
++            (navigator as? EpubNavigatorFragment)?.submitPreferences(userPreferences)
++        } else if (this::navigator.isInitialized) {
++            (navigator as? EpubNavigatorFragment)?.submitPreferences(userPreferences)
+         }
+-        (navigator as? EpubNavigatorFragment)?.submitPreferences(userPreferences)
+     }
+ 
+     private inner class SelectionActionModeCallback : ActionMode.Callback {

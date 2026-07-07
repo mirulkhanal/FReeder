@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- OPDS catalogs (Komga, Calibre, etc.) are often plain HTTP on a home LAN.
+         Readium also serves resources over local HTTP during reading. -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
