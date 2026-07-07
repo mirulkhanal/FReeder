@@ -7,8 +7,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { PublicationMetadata } from 'react-native-readium';
+
 import { useTheme } from '../../theme';
+
+import type { PublicationMetadata } from 'react-native-readium';
 
 type ReaderMetadataModalProps = {
   visible: boolean;
@@ -27,20 +29,36 @@ export function ReaderMetadataModal({
     return null;
   }
 
-  const authors = metadata.author?.map(person => person.name).filter(Boolean) ?? [];
+  const authors =
+    metadata.author?.map(person => person.name).filter(Boolean) ?? [];
   const publisher = metadata.publisher?.[0]?.name;
   const languages = metadata.language?.join(', ');
-  const subjects = metadata.subject?.map(item => item.name).filter(Boolean) ?? [];
+  const subjects =
+    metadata.subject?.map(item => item.name).filter(Boolean) ?? [];
   const series = metadata.belongsTo?.series?.[0]?.name;
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
-            <Text style={[typography.headline, { color: colors.onSurface }]}>About this book</Text>
+            <Text style={[typography.headline, { color: colors.onSurface }]}>
+              About this book
+            </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Close</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Close
+              </Text>
             </Pressable>
           </View>
 
@@ -52,23 +70,36 @@ export function ReaderMetadataModal({
             {authors.length > 0 ? (
               <MetadataField label="Author" value={authors.join(', ')} />
             ) : null}
-            {publisher ? <MetadataField label="Publisher" value={publisher} /> : null}
-            {metadata.published ? (
-              <MetadataField label="Published" value={formatDate(metadata.published)} />
+            {publisher ? (
+              <MetadataField label="Publisher" value={publisher} />
             ) : null}
-            {languages ? <MetadataField label="Language" value={languages} /> : null}
+            {metadata.published ? (
+              <MetadataField
+                label="Published"
+                value={formatDate(metadata.published)}
+              />
+            ) : null}
+            {languages ? (
+              <MetadataField label="Language" value={languages} />
+            ) : null}
             {series ? <MetadataField label="Series" value={series} /> : null}
             {metadata.identifier ? (
               <MetadataField label="Identifier" value={metadata.identifier} />
             ) : null}
             {metadata.numberOfPages != null ? (
-              <MetadataField label="Pages" value={String(metadata.numberOfPages)} />
+              <MetadataField
+                label="Pages"
+                value={String(metadata.numberOfPages)}
+              />
             ) : null}
             {subjects.length > 0 ? (
               <MetadataField label="Subjects" value={subjects.join(', ')} />
             ) : null}
             {metadata.description ? (
-              <MetadataField label="Description" value={stripHtml(metadata.description)} />
+              <MetadataField
+                label="Description"
+                value={stripHtml(metadata.description)}
+              />
             ) : null}
           </ScrollView>
         </View>
@@ -81,10 +112,18 @@ function MetadataField({ label, value }: { label: string; value: string }) {
   const { colors, typography } = useTheme();
   return (
     <View style={styles.field}>
-      <Text style={[typography.caption, styles.label, { color: colors.onSurfaceVariant }]}>
+      <Text
+        style={[
+          typography.caption,
+          styles.label,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
         {label.toUpperCase()}
       </Text>
-      <Text style={[typography.body, { color: colors.onSurface }]}>{value}</Text>
+      <Text style={[typography.body, { color: colors.onSurface }]}>
+        {value}
+      </Text>
     </View>
   );
 }
@@ -98,7 +137,10 @@ function formatDate(value: string): string {
 }
 
 function stripHtml(value: string): string {
-  return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 const styles = StyleSheet.create({

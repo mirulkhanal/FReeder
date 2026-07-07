@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
+
+import type { ReadingMode } from '../services/readerPreferences';
 import type { RefObject } from 'react';
 import type { ReadiumViewRef } from 'react-native-readium';
-import type { ReadingMode } from '../services/readerPreferences';
 
 export function useAutoScroll(
   readerRef: RefObject<ReadiumViewRef | null>,

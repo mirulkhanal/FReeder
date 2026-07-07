@@ -1,10 +1,16 @@
-import type { OpdsCatalog, OpdsFeed } from '../types/opds';
-import { parseOpdsFeed, parseOpenSearchDescription } from './opdsParser';
-import { isOpds2Json, parseOpds2Feed, parseOpds2SearchTemplate } from './opdsParser2';
-import type { OpdsSearchTemplate } from '../types/opds';
 import { encodeBase64 } from '../utils/base64';
-import { fetchHttpText } from './opdsHttp';
+
 import { loadCatalogPassword } from './opdsCredentials';
+import { fetchHttpText } from './opdsHttp';
+import { parseOpdsFeed, parseOpenSearchDescription } from './opdsParser';
+import {
+  isOpds2Json,
+  parseOpds2Feed,
+  parseOpds2SearchTemplate,
+} from './opdsParser2';
+
+import type { OpdsCatalog, OpdsFeed } from '../types/opds';
+import type { OpdsSearchTemplate } from '../types/opds';
 
 export function resolveOpdsUrl(baseUrl: string, href: string): string {
   if (href.startsWith('http://') || href.startsWith('https://')) {
@@ -13,7 +19,10 @@ export function resolveOpdsUrl(baseUrl: string, href: string): string {
   return new URL(href, baseUrl).toString();
 }
 
-function authHeader(catalog: OpdsCatalog, password?: string): Record<string, string> {
+function authHeader(
+  catalog: OpdsCatalog,
+  password?: string,
+): Record<string, string> {
   if (!catalog.username) {
     return {};
   }
@@ -53,7 +62,9 @@ function describeFetchFailure(error: unknown, url: string): Error {
     const message = error.message.toLowerCase();
     if (isConnectionError(message)) {
       return new Error(
-        `Could not reach ${formatHost(url)}. On Tailscale, try the server's 100.x.x.x IP or full MagicDNS name (e.g. meebian.your-tailnet.ts.net:25600) instead of a short hostname. For Komga, add your username and password. Rebuild the app after installing updates — a Metro reload is not enough for network changes.`,
+        `Could not reach ${formatHost(
+          url,
+        )}. On Tailscale, try the server's 100.x.x.x IP or full MagicDNS name (e.g. meebian.your-tailnet.ts.net:25600) instead of a short hostname. For Komga, add your username and password. Rebuild the app after installing updates — a Metro reload is not enough for network changes.`,
       );
     }
   }
@@ -63,10 +74,14 @@ function describeFetchFailure(error: unknown, url: string): Error {
 function describeHttpFailure(status: number, url: string): Error {
   if (status === 401 || status === 403) {
     return new Error(
-      `Authentication failed (${status}) for ${formatHost(url)}. Edit the catalog and add your Komga username and password.`,
+      `Authentication failed (${status}) for ${formatHost(
+        url,
+      )}. Edit the catalog and add your Komga username and password.`,
     );
   }
-  return new Error(`Catalog request failed (${status}) for ${formatHost(url)}.`);
+  return new Error(
+    `Catalog request failed (${status}) for ${formatHost(url)}.`,
+  );
 }
 
 function formatHost(url: string): string {
@@ -116,7 +131,7 @@ export async function fetchOpdsFeed(
 ): Promise<OpdsFeed> {
   const body = await fetchOpdsXml(catalog, url);
   if (isOpds2Json(body)) {
-    return parseOpds2Feed(body, url);
+    return parseOpds2Feed(body);
   }
   return parseOpdsFeed(body);
 }
@@ -127,7 +142,7 @@ export async function fetchOpenSearchTemplate(
 ): Promise<OpdsSearchTemplate | null> {
   const body = await fetchOpdsXml(catalog, descriptionUrl);
   if (isOpds2Json(body)) {
-    const feed = parseOpds2Feed(body, descriptionUrl);
+    const feed = parseOpds2Feed(body);
     return parseOpds2SearchTemplate(feed, descriptionUrl);
   }
   return parseOpenSearchDescription(body);

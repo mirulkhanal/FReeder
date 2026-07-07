@@ -1,14 +1,17 @@
 import { FileSystem } from 'react-native-file-access';
-import type { Book } from '../types/book';
+
 import { getBookFileName } from '../types/book';
-import { clearCachedBookCopy } from './bookFile';
-import { clearCachedCoverForBook } from './epubCover';
-import { clearAllReadingStates, removeReadingState } from './readingProgress';
-import { clearLibraryStorage } from './libraryStorage';
-import { removeBookmarksForBook } from './bookBookmarks';
+
 import { removeHighlightsForBook } from './bookAnnotations';
-import { removeBookFromAllCollections } from './collectionsStorage';
+import { removeBookmarksForBook } from './bookBookmarks';
+import { clearCachedBookCopy } from './bookFile';
 import { clearBookReaderPrefs } from './bookReaderPrefs';
+import { removeBookFromAllCollections } from './collectionsStorage';
+import { clearCachedCoverForBook } from './epubCover';
+import { clearLibraryStorage } from './libraryStorage';
+import { clearAllReadingStates, removeReadingState } from './readingProgress';
+
+import type { Book } from '../types/book';
 
 function stripFileScheme(uri: string): string {
   return uri.replace(/^file:\/\//, '');
@@ -19,7 +22,9 @@ async function deleteFileAtPath(path: string): Promise<void> {
     await FileSystem.unlink(path);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Could not delete the book file.';
+      error instanceof Error
+        ? error.message
+        : 'Could not delete the book file.';
     throw new Error(message);
   }
 }
@@ -86,17 +91,26 @@ export function classifyBookOpenError(error: unknown): {
   const raw = error instanceof Error ? error.message : String(error);
   const lower = raw.toLowerCase();
 
-  if (lower.includes('permission') || lower.includes('eacces') || lower.includes('security')) {
+  if (
+    lower.includes('permission') ||
+    lower.includes('eacces') ||
+    lower.includes('security')
+  ) {
     return {
       code: 'permission',
       message:
         'FReeder no longer has permission to open this book. Use “Locate file” in the library or re-select your books folder.',
     };
   }
-  if (lower.includes('enoent') || lower.includes('not found') || lower.includes('no such file')) {
+  if (
+    lower.includes('enoent') ||
+    lower.includes('not found') ||
+    lower.includes('no such file')
+  ) {
     return {
       code: 'missing',
-      message: 'This book file could not be found. It may have been moved or deleted.',
+      message:
+        'This book file could not be found. It may have been moved or deleted.',
     };
   }
   if (lower.includes('pdf')) {
@@ -105,13 +119,22 @@ export function classifyBookOpenError(error: unknown): {
       message: 'FReeder supports EPUB only. PDF files cannot be opened.',
     };
   }
-  if (lower.includes('space') || lower.includes('enospc') || lower.includes('storage')) {
+  if (
+    lower.includes('space') ||
+    lower.includes('enospc') ||
+    lower.includes('storage')
+  ) {
     return {
       code: 'storage',
       message: 'Not enough storage space to open this book.',
     };
   }
-  if (lower.includes('zip') || lower.includes('epub') || lower.includes('parse') || lower.includes('corrupt')) {
+  if (
+    lower.includes('zip') ||
+    lower.includes('epub') ||
+    lower.includes('parse') ||
+    lower.includes('corrupt')
+  ) {
     return {
       code: 'corrupt',
       message: 'This EPUB file appears to be damaged or unsupported.',

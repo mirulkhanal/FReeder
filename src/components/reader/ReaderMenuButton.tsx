@@ -32,7 +32,10 @@ export function ReaderMenuButton({
   }
 
   return (
-    <Animated.View pointerEvents={chromeVisible ? 'none' : 'box-none'} style={[styles.root, { opacity }]}>
+    <Animated.View
+      pointerEvents={chromeVisible ? 'none' : 'box-none'}
+      style={[styles.root, { opacity }]}
+    >
       <Pressable
         accessibilityLabel="Show reader menu"
         accessibilityRole="button"
@@ -43,7 +46,8 @@ export function ReaderMenuButton({
             backgroundColor: surfaceColor,
             opacity: pressed ? 0.9 : 1,
           },
-        ]}>
+        ]}
+      >
         <Icon color={iconColor} name="menu" size={22} />
       </Pressable>
     </Animated.View>

@@ -1,3 +1,10 @@
+import {
+  pick,
+  pickDirectory,
+  types,
+  isErrorWithCode,
+  errorCodes,
+} from '@react-native-documents/picker';
 import React, {
   createContext,
   useCallback,
@@ -7,14 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  pick,
-  pickDirectory,
-  types,
-  isErrorWithCode,
-  errorCodes,
-} from '@react-native-documents/picker';
-import { scanLibraryFolder, isSupportedBookFileName } from '../services/libraryScanner';
+
 import {
   clearLibraryKeepingFiles,
   deleteBookFromDevice,
@@ -27,11 +27,16 @@ import {
   mergeScannedWithLibrary,
 } from '../services/libraryMerge';
 import {
+  scanLibraryFolder,
+  isSupportedBookFileName,
+} from '../services/libraryScanner';
+import {
   loadCachedBooks,
   loadLibraryFolderUri,
   saveCachedBooks,
   saveLibraryFolderUri,
 } from '../services/libraryStorage';
+
 import type { Book } from '../types/book';
 
 type LibraryContextValue = {
@@ -157,7 +162,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       await applyScan(result.uri);
     } catch (error) {
-      if (isErrorWithCode(error) && error.code === errorCodes.OPERATION_CANCELED) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === errorCodes.OPERATION_CANCELED
+      ) {
         return;
       }
       throw error;
@@ -197,7 +205,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       );
       await finalizeBooks(merged);
     } catch (error) {
-      if (isErrorWithCode(error) && error.code === errorCodes.OPERATION_CANCELED) {
+      if (
+        isErrorWithCode(error) &&
+        error.code === errorCodes.OPERATION_CANCELED
+      ) {
         return;
       }
       throw error;
@@ -308,7 +319,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
+    void (async () => {
       try {
         const [storedUri, cachedBooks] = await Promise.all([
           loadLibraryFolderUri(),

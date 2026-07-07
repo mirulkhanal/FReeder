@@ -1,6 +1,7 @@
-import JSZip from 'jszip';
 import { unzip } from 'fflate';
+import JSZip from 'jszip';
 import { Dirs, FileSystem } from 'react-native-file-access';
+
 import { resolveReadableBookUri } from './bookFile';
 
 const COVER_CACHE_DIR = `${Dirs.CacheDir}/covers`;
@@ -42,8 +43,7 @@ export type EpubMetadata = {
 function cacheKeyForUri(sourceUri: string): string {
   let hash = 0;
   for (let i = 0; i < sourceUri.length; i += 1) {
-    hash = (hash << 5) - hash + sourceUri.charCodeAt(i);
-    hash |= 0;
+    hash = (Math.imul(hash, 31) + sourceUri.charCodeAt(i)) % 4294967296;
   }
   return Math.abs(hash).toString(16);
 }
@@ -70,7 +70,10 @@ function resolveArchivePath(basePath: string, relativeHref: string): string {
     ? basePath.slice(0, basePath.lastIndexOf('/'))
     : '';
 
-  if (baseDir && (decodedHref === baseDir || decodedHref.startsWith(`${baseDir}/`))) {
+  if (
+    baseDir &&
+    (decodedHref === baseDir || decodedHref.startsWith(`${baseDir}/`))
+  ) {
     return decodedHref;
   }
 
@@ -151,7 +154,10 @@ function looksLikeCoverPath(value: string): boolean {
   if (/(?:^|[/_.-])cover\.(jpe?g|png|gif|webp)(?:$|[?#])/i.test(lower)) {
     return true;
   }
-  return /(?:^|[/_.-])cover(?:$|[/_.-])/i.test(lower) && /\.(jpe?g|png|gif|webp)$/i.test(lower);
+  return (
+    /(?:^|[/_.-])cover(?:$|[/_.-])/i.test(lower) &&
+    /\.(jpe?g|png|gif|webp)$/i.test(lower)
+  );
 }
 
 function isCoverImagePath(value: string): boolean {
@@ -210,8 +216,12 @@ function findCoverHrefInOpf(opf: string, opfPath: string): string | null {
   }
 
   const coverMetaValue =
-    opf.match(/<meta\b[^>]*\bname=["']cover["'][^>]*\bcontent=["']([^"']+)["']/i)?.[1] ??
-    opf.match(/<meta\b[^>]*\bcontent=["']([^"']+)["'][^>]*\bname=["']cover["']/i)?.[1];
+    opf.match(
+      /<meta\b[^>]*\bname=["']cover["'][^>]*\bcontent=["']([^"']+)["']/i,
+    )?.[1] ??
+    opf.match(
+      /<meta\b[^>]*\bcontent=["']([^"']+)["'][^>]*\bname=["']cover["']/i,
+    )?.[1];
 
   if (coverMetaValue) {
     for (const tag of itemTags) {
@@ -257,16 +267,24 @@ function findCoverHrefInOpf(opf: string, opfPath: string): string | null {
   }
 
   const linkHref =
-    opf.match(/<link\b[^>]*\brel=["']cover["'][^>]*\bhref=["']([^"']+)["']/i)?.[1] ??
-    opf.match(/<link\b[^>]*\bhref=["']([^"']+)["'][^>]*\brel=["']cover["']/i)?.[1];
+    opf.match(
+      /<link\b[^>]*\brel=["']cover["'][^>]*\bhref=["']([^"']+)["']/i,
+    )?.[1] ??
+    opf.match(
+      /<link\b[^>]*\bhref=["']([^"']+)["'][^>]*\brel=["']cover["']/i,
+    )?.[1];
 
   if (linkHref) {
     return resolveArchivePath(opfPath, linkHref);
   }
 
   const guideHref =
-    opf.match(/<reference\b[^>]*\btype=["']cover["'][^>]*\bhref=["']([^"']+)["']/i)?.[1] ??
-    opf.match(/<reference\b[^>]*\bhref=["']([^"']+)["'][^>]*\btype=["']cover["']/i)?.[1];
+    opf.match(
+      /<reference\b[^>]*\btype=["']cover["'][^>]*\bhref=["']([^"']+)["']/i,
+    )?.[1] ??
+    opf.match(
+      /<reference\b[^>]*\bhref=["']([^"']+)["'][^>]*\btype=["']cover["']/i,
+    )?.[1];
 
   if (guideHref) {
     return resolveArchivePath(opfPath, guideHref);
@@ -294,7 +312,11 @@ function findCoverHrefInOpf(opf: string, opfPath: string): string | null {
   return null;
 }
 
-function findFirstSpineHref(opf: string, opfPath: string, itemTags: string[]): string | null {
+function findFirstSpineHref(
+  opf: string,
+  opfPath: string,
+  itemTags: string[],
+): string | null {
   const itemsById = new Map<string, string>();
   for (const tag of itemTags) {
     const id = readId(tag);
@@ -309,7 +331,9 @@ function findFirstSpineHref(opf: string, opfPath: string, itemTags: string[]): s
     return null;
   }
 
-  const firstRef = spineBody.match(/<itemref\b[^>]*\bidref=["']([^"']+)["']/i)?.[1];
+  const firstRef = spineBody.match(
+    /<itemref\b[^>]*\bidref=["']([^"']+)["']/i,
+  )?.[1];
   if (!firstRef) {
     return null;
   }
@@ -347,7 +371,9 @@ async function persistCoverFromReader(
   }
 }
 
-function parseOpfMetadata(opf: string): Pick<EpubMetadata, 'title' | 'author' | 'series'> {
+function parseOpfMetadata(
+  opf: string,
+): Pick<EpubMetadata, 'title' | 'author' | 'series'> {
   const title =
     opf.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/i)?.[1]?.trim() ??
     opf.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim();
@@ -355,14 +381,28 @@ function parseOpfMetadata(opf: string): Pick<EpubMetadata, 'title' | 'author' | 
     opf.match(/<dc:creator[^>]*>([^<]+)<\/dc:creator>/i)?.[1]?.trim() ??
     opf.match(/<creator[^>]*>([^<]+)<\/creator>/i)?.[1]?.trim();
   const series =
-    opf.match(/<meta[^>]+name=["']calibre:series["'][^>]+content=["']([^"']+)["']/i)?.[1]?.trim() ??
-    opf.match(/<meta[^>]+property=["']belongs-to-collection["'][^>]*>([^<]+)</i)?.[1]?.trim();
+    opf
+      .match(
+        /<meta[^>]+name=["']calibre:series["'][^>]+content=["']([^"']+)["']/i,
+      )?.[1]
+      ?.trim() ??
+    opf
+      .match(
+        /<meta[^>]+property=["']belongs-to-collection["'][^>]*>([^<]+)</i,
+      )?.[1]
+      ?.trim();
   return { title, author, series };
 }
 
 function extensionForPath(path: string): string {
   const ext = path.split('.').pop()?.toLowerCase();
-  if (ext === 'png' || ext === 'gif' || ext === 'webp' || ext === 'jpeg' || ext === 'jpg') {
+  if (
+    ext === 'png' ||
+    ext === 'gif' ||
+    ext === 'webp' ||
+    ext === 'jpeg' ||
+    ext === 'jpg'
+  ) {
     return ext === 'jpeg' ? 'jpg' : ext;
   }
   return 'jpg';
@@ -402,7 +442,8 @@ function findCoverPathInZip(zip: JSZip): string | null {
   }
 
   const coverFile = Object.keys(zip.files).find(
-    key => !zip.files[key].dir && /(?:^|\/)cover\.(jpe?g|png|gif|webp)$/i.test(key),
+    key =>
+      !zip.files[key].dir && /(?:^|\/)cover\.(jpe?g|png|gif|webp)$/i.test(key),
   );
 
   return coverFile ?? null;
@@ -565,7 +606,8 @@ async function isValidCoverFile(path: string): Promise<boolean> {
       return false;
     }
 
-    const isJpeg = header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
+    const isJpeg =
+      header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
     const isPng =
       header.length >= 4 &&
       header[0] === 0x89 &&
@@ -716,8 +758,8 @@ function createMapReader(files: Record<string, Uint8Array>): ZipReader {
         }
       }
 
-      const coverFile = Object.keys(files).find(
-        key => /(?:^|\/)cover\.(jpe?g|png|gif|webp)$/i.test(key),
+      const coverFile = Object.keys(files).find(key =>
+        /(?:^|\/)cover\.(jpe?g|png|gif|webp)$/i.test(key),
       );
       return coverFile ?? null;
     },
@@ -733,7 +775,11 @@ async function writeCoverBytes(
   const outputPath = `${COVER_CACHE_DIR}/${cacheKey}_${COVER_CACHE_VERSION}.${ext}`;
 
   await ensureCoverCacheDir();
-  await FileSystem.writeFile(outputPath, uint8ArrayToBase64(coverBytes), 'base64');
+  await FileSystem.writeFile(
+    outputPath,
+    uint8ArrayToBase64(coverBytes),
+    'base64',
+  );
 
   if (!(await isValidCoverFile(outputPath))) {
     try {
@@ -770,7 +816,10 @@ async function writeCoverBase64(
   return `file://${outputPath}`;
 }
 
-async function getLocalEpubPath(fileUrl: string, fileName: string): Promise<string> {
+async function getLocalEpubPath(
+  fileUrl: string,
+  fileName: string,
+): Promise<string> {
   const readableUri = await resolveReadableBookUri(fileUrl, fileName);
   return stripFileScheme(readableUri);
 }
@@ -794,15 +843,21 @@ async function extractUsingFflate(
 ): Promise<EpubMetadata> {
   try {
     const bytes = await readEpubBytes(epubPath);
-    const files = await new Promise<Record<string, Uint8Array>>((resolve, reject) => {
-      unzip(bytes, { filter: file => shouldExtractForCover(file.name) }, (err, data) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(data);
-      });
-    });
+    const files = await new Promise<Record<string, Uint8Array>>(
+      (resolve, reject) => {
+        unzip(
+          bytes,
+          { filter: file => shouldExtractForCover(file.name) },
+          (err, data) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(data);
+          },
+        );
+      },
+    );
 
     if (!findBytesForPath(files, 'META-INF/container.xml')) {
       return {};
@@ -1003,14 +1058,20 @@ async function extractFromLocalEpub(
   return {};
 }
 
-export async function getCachedCoverUri(fileUrl: string): Promise<string | null> {
+export async function getCachedCoverUri(
+  fileUrl: string,
+): Promise<string | null> {
   return findCachedCover(cacheKeyForUri(fileUrl));
 }
 
 export async function clearCachedCoverForBook(fileUrl: string): Promise<void> {
   const cacheKey = cacheKeyForUri(fileUrl);
   const extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-  const prefixes = [`${cacheKey}_${COVER_CACHE_VERSION}`, `${cacheKey}_v1`, cacheKey];
+  const prefixes = [
+    `${cacheKey}_${COVER_CACHE_VERSION}`,
+    `${cacheKey}_v1`,
+    cacheKey,
+  ];
 
   for (const prefix of prefixes) {
     for (const ext of extensions) {

@@ -1,12 +1,19 @@
 import { Platform } from 'react-native';
-import { AndroidScoped, Dirs, FileSystem, Util } from 'react-native-file-access';
-import type { OpdsCatalog, OpdsEntry } from '../types/opds';
-import { getAcquisitionLinks } from './opdsParser';
+import {
+  AndroidScoped,
+  Dirs,
+  FileSystem,
+  Util,
+} from 'react-native-file-access';
+
 import { encodeBase64 } from '../utils/base64';
+
 import { resolveOpdsUrl } from './opdsClient';
 import { loadCatalogPassword } from './opdsCredentials';
+import { getAcquisitionLinks } from './opdsParser';
 
-const OPDS_DOWNLOAD_DIR = `${Dirs.DocumentDir}/freeder/opds-downloads`;
+import type { OpdsCatalog, OpdsEntry } from '../types/opds';
+
 const LOCAL_LIBRARY_DIR = `${Dirs.DocumentDir}/freeder/library`;
 
 function sanitizeFileName(name: string): string {
@@ -28,7 +35,10 @@ function joinLibraryPath(folderUri: string, fileName: string): string {
   return `${folderUri}${separator}${fileName}`;
 }
 
-function requestHeaders(catalog: OpdsCatalog, password?: string): Record<string, string> {
+function requestHeaders(
+  catalog: OpdsCatalog,
+  password?: string,
+): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: 'application/epub+zip, application/epub, */*',
     'User-Agent': 'FReeder/0.0.1 (OPDS)',
@@ -48,7 +58,10 @@ async function ensureDir(path: string): Promise<void> {
   }
 }
 
-async function uniqueLibraryPath(folderUri: string, fileName: string): Promise<string> {
+async function uniqueLibraryPath(
+  folderUri: string,
+  fileName: string,
+): Promise<string> {
   let candidate = joinLibraryPath(folderUri, fileName);
   if (!(await FileSystem.exists(candidate))) {
     return candidate;
@@ -58,7 +71,10 @@ async function uniqueLibraryPath(folderUri: string, fileName: string): Promise<s
   const baseName = Util.basename(fileName, extension);
 
   for (let index = 2; index < 100; index += 1) {
-    candidate = joinLibraryPath(folderUri, `${baseName} (${index})${extension}`);
+    candidate = joinLibraryPath(
+      folderUri,
+      `${baseName} (${index})${extension}`,
+    );
     if (!(await FileSystem.exists(candidate))) {
       return candidate;
     }

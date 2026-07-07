@@ -1,11 +1,9 @@
-import type { OpdsEntry, OpdsFeed, OpdsLink, OpdsSearchTemplate } from '../types/opds';
-import {
-  getAcquisitionLinks,
-  getNavigationLinks,
-  getPublicationEntries,
-  isEpubAcquisitionLink,
-  isNavigationLink,
-} from './opdsParser';
+import type {
+  OpdsEntry,
+  OpdsFeed,
+  OpdsLink,
+  OpdsSearchTemplate,
+} from '../types/opds';
 
 type Opds2Link = {
   rel?: string | string[];
@@ -38,10 +36,6 @@ function relList(rel?: string | string[]): string[] {
   return Array.isArray(rel) ? rel : [rel];
 }
 
-function linkTitle(link: Opds2Link): string | undefined {
-  return link.title;
-}
-
 function toOpdsLink(link: Opds2Link): OpdsLink | null {
   if (!link.href) {
     return null;
@@ -69,7 +63,12 @@ function publicationAuthor(pub: Opds2Publication): string | undefined {
     return undefined;
   }
   if (Array.isArray(author)) {
-    return author.map(entry => entry.name).filter(Boolean).join(', ') || undefined;
+    return (
+      author
+        .map(entry => entry.name)
+        .filter(Boolean)
+        .join(', ') || undefined
+    );
   }
   return author.name;
 }
@@ -97,7 +96,9 @@ function publicationToEntry(pub: Opds2Publication, index: number): OpdsEntry {
     title: publicationTitle(pub),
     author: publicationAuthor(pub),
     summary:
-      typeof pub.metadata?.description === 'string' ? pub.metadata.description : undefined,
+      typeof pub.metadata?.description === 'string'
+        ? pub.metadata.description
+        : undefined,
     links,
   };
 }
@@ -107,15 +108,16 @@ export function isOpds2Json(body: string): boolean {
   return trimmed.startsWith('{') && trimmed.includes('"metadata"');
 }
 
-export function parseOpds2Feed(json: string, baseUrl = ''): OpdsFeed {
+export function parseOpds2Feed(json: string): OpdsFeed {
   const parsed = JSON.parse(json) as Opds2Feed;
   const feedLinks = (parsed.links ?? [])
     .map(toOpdsLink)
     .filter((link): link is OpdsLink => link != null);
 
-  const publications = [...(parsed.publications ?? []), ...(parsed.navigation ?? [])].map(
-    publicationToEntry,
-  );
+  const publications = [
+    ...(parsed.publications ?? []),
+    ...(parsed.navigation ?? []),
+  ].map(publicationToEntry);
 
   const nextUrl = feedLinks.find(link => link.rel === 'next')?.href;
   const searchDescriptionUrl = feedLinks.find(link =>
@@ -143,7 +145,9 @@ export function parseOpds2SearchTemplate(
   }
   const template = searchLink.href.includes('{searchTerms}')
     ? searchLink.href
-    : `${searchLink.href}${searchLink.href.includes('?') ? '&' : '?'}q={searchTerms}`;
+    : `${searchLink.href}${
+        searchLink.href.includes('?') ? '&' : '?'
+      }q={searchTerms}`;
   return {
     type: searchLink.type ?? 'application/opds+json',
     template: resolveOpds2Url(baseUrl, template),

@@ -1,5 +1,6 @@
-import type { Locator } from 'react-native-readium';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import type { Locator } from 'react-native-readium';
 
 const PROGRESS_KEY = '@freeder/readingProgress';
 const PROGRESS_BACKUP_KEY = '@freeder/readingProgressBackup';
@@ -132,9 +133,7 @@ export async function saveAllReadingStates(map: ProgressMap): Promise<void> {
 
 export function progressFromLocator(locator: Locator): number {
   return (
-    locator.locations?.totalProgression ??
-    locator.locations?.progression ??
-    0
+    locator.locations?.totalProgression ?? locator.locations?.progression ?? 0
   );
 }
 

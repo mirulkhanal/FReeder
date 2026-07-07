@@ -1,17 +1,14 @@
-import React, { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  View,
-} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import type { CompositeScreenProps } from '@react-navigation/native';
-import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+
+import {
+  BookActionModal,
+  type BookActionId,
+} from '../components/library/BookActionModal';
+import { CollectionsModal } from '../components/library/CollectionsModal';
 import { LibraryContent } from '../components/LibraryContent';
 import { LibraryEmptyHero } from '../components/LibraryEmptyHero';
-import { BookActionModal, type BookActionId } from '../components/library/BookActionModal';
-import { CollectionsModal } from '../components/library/CollectionsModal';
 import { TabScreenLayout } from '../components/TabScreenLayout';
 import { useLibrary } from '../context/LibraryContext';
 import { useReadingProgress } from '../hooks/useReadingProgress';
@@ -19,16 +16,20 @@ import {
   loadCollections,
   type BookCollection,
 } from '../services/collectionsStorage';
+import { showThemedAlert, showThemedDialog } from '../services/themedDialog';
+import { useTheme } from '../theme';
 import {
   exportBookNotes,
   promptDeleteBook,
   promptRelocateBook,
   shareEpub,
 } from '../utils/bookActions';
-import { showThemedAlert, showThemedDialog } from '../services/themedDialog';
+
 import type { MainTabParamList, RootStackParamList } from '../navigation/types';
 import type { Book } from '../types/book';
-import { useTheme } from '../theme';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'LibraryTab'>,
@@ -39,13 +40,10 @@ export function LibraryScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const {
     books,
-    folderUri,
     isLoading,
     isSelectingFolder,
     selectLibraryFolder,
     importSingleBook,
-    refreshLibrary,
-    reextractCovers,
     deleteBook,
     removeBook,
     relocateBook,
@@ -55,7 +53,9 @@ export function LibraryScreen({ navigation }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [collections, setCollections] = useState<BookCollection[]>([]);
   const [collectionsModalVisible, setCollectionsModalVisible] = useState(false);
-  const [collectionsModalBook, setCollectionsModalBook] = useState<Book | null>(null);
+  const [collectionsModalBook, setCollectionsModalBook] = useState<Book | null>(
+    null,
+  );
   const [actionBook, setActionBook] = useState<Book | null>(null);
 
   const reloadCollections = useCallback(() => {
@@ -64,7 +64,7 @@ export function LibraryScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      reload();
+      void reload();
       reloadCollections();
     }, [reload, reloadCollections]),
   );
@@ -90,7 +90,9 @@ export function LibraryScreen({ navigation }: Props) {
             } catch (error) {
               showThemedAlert(
                 'Remove failed',
-                error instanceof Error ? error.message : 'Could not remove this book.',
+                error instanceof Error
+                  ? error.message
+                  : 'Could not remove this book.',
               );
             }
           })();
@@ -147,7 +149,9 @@ export function LibraryScreen({ navigation }: Props) {
           void shareEpub(book).catch(error => {
             showThemedAlert(
               'Share failed',
-              error instanceof Error ? error.message : 'Could not share this EPUB.',
+              error instanceof Error
+                ? error.message
+                : 'Could not share this EPUB.',
             );
           });
           break;
@@ -155,7 +159,9 @@ export function LibraryScreen({ navigation }: Props) {
           void exportBookNotes(book).catch(error => {
             showThemedAlert(
               'Export failed',
-              error instanceof Error ? error.message : 'Could not export notes for this book.',
+              error instanceof Error
+                ? error.message
+                : 'Could not export notes for this book.',
             );
           });
           break;
@@ -176,7 +182,9 @@ export function LibraryScreen({ navigation }: Props) {
           } catch (error) {
             showThemedAlert(
               'Locate failed',
-              error instanceof Error ? error.message : 'Could not locate this book.',
+              error instanceof Error
+                ? error.message
+                : 'Could not locate this book.',
             );
           }
         })();
@@ -210,7 +218,9 @@ export function LibraryScreen({ navigation }: Props) {
               } catch (error) {
                 showThemedAlert(
                   'Import failed',
-                  error instanceof Error ? error.message : 'Could not import that file.',
+                  error instanceof Error
+                    ? error.message
+                    : 'Could not import that file.',
                 );
               }
             })();
@@ -225,7 +235,9 @@ export function LibraryScreen({ navigation }: Props) {
               } catch (error) {
                 showThemedAlert(
                   'Folder selection failed',
-                  error instanceof Error ? error.message : 'Could not access that folder.',
+                  error instanceof Error
+                    ? error.message
+                    : 'Could not access that folder.',
                 );
               }
             })();
@@ -241,7 +253,9 @@ export function LibraryScreen({ navigation }: Props) {
       await selectLibraryFolder();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Could not access that folder.';
+        error instanceof Error
+          ? error.message
+          : 'Could not access that folder.';
       showThemedAlert('Folder selection failed', message);
     }
   }, [selectLibraryFolder]);
@@ -264,7 +278,8 @@ export function LibraryScreen({ navigation }: Props) {
       searchActive={searchActive}
       searchQuery={searchQuery}
       onSearchQueryChange={setSearchQuery}
-      onSearchClose={closeSearch}>
+      onSearchClose={closeSearch}
+    >
       {isLoading && !isSelectingFolder ? (
         <View style={styles.loading}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -279,7 +294,9 @@ export function LibraryScreen({ navigation }: Props) {
             } catch (error) {
               showThemedAlert(
                 'Import failed',
-                error instanceof Error ? error.message : 'Could not import that file.',
+                error instanceof Error
+                  ? error.message
+                  : 'Could not import that file.',
               );
             }
           }}

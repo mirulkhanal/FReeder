@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../theme';
 
 type SettingsAboutSectionProps = {
@@ -12,12 +13,25 @@ export function SettingsAboutSection({ version }: SettingsAboutSectionProps) {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.iconWrap, { backgroundColor: colors.surfaceContainerHigh }]}>
+      <View
+        style={[
+          styles.iconWrap,
+          { backgroundColor: colors.surfaceContainerHigh },
+        ]}
+      >
         <Icon name="info" size={32} color={colors.primary} />
       </View>
 
-      <Text style={[typography.headline, { color: colors.onSurface }]}>About FReeder</Text>
-      <Text style={[typography.body, styles.version, { color: colors.onSurfaceVariant }]}>
+      <Text style={[typography.headline, { color: colors.onSurface }]}>
+        About FReeder
+      </Text>
+      <Text
+        style={[
+          typography.body,
+          styles.version,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
         Version {version}
       </Text>
 
@@ -25,15 +39,21 @@ export function SettingsAboutSection({ version }: SettingsAboutSectionProps) {
         {['EPUB 2', 'EPUB 3', 'DRM-Free'].map(tag => (
           <View
             key={tag}
-            style={[styles.tag, { backgroundColor: colors.surfaceContainerLow }]}>
-            <Text style={[styles.tagText, { color: colors.onSurfaceVariant }]}>{tag}</Text>
+            style={[
+              styles.tag,
+              { backgroundColor: colors.surfaceContainerLow },
+            ]}
+          >
+            <Text style={[styles.tagText, { color: colors.onSurfaceVariant }]}>
+              {tag}
+            </Text>
           </View>
         ))}
       </View>
 
       <Text style={[styles.disclaimer, { color: colors.outline }]}>
-        PDF, MOBI, and Kindle proprietary formats are currently not supported to maintain the
-        high typographic standards of the reading engine.
+        PDF, MOBI, and Kindle proprietary formats are currently not supported to
+        maintain the high typographic standards of the reading engine.
       </Text>
     </View>
   );

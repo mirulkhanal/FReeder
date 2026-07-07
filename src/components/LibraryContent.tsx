@@ -6,15 +6,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { Book } from '../types/book';
-import type { BookCollection } from '../services/collectionsStorage';
-import type { ReadingState } from '../services/readingProgress';
+
 import { useLibrary } from '../context/LibraryContext';
-import { BookGridItem, ImportBookTile } from './BookGridItem';
-import { CollectionChips } from './CollectionChips';
-import { FilterChips, type LibraryFilter } from './FilterChips';
-import { NowReadingCard } from './NowReadingCard';
-import { SortChips, type LibrarySort } from './SortChips';
+import { useTheme } from '../theme';
 import {
   filterBooks,
   filterByCollection,
@@ -23,7 +17,16 @@ import {
   searchBooks,
   sortBooks,
 } from '../utils/libraryFilters';
-import { useTheme } from '../theme';
+
+import { BookGridItem, ImportBookTile } from './BookGridItem';
+import { CollectionChips } from './CollectionChips';
+import { FilterChips, type LibraryFilter } from './FilterChips';
+import { NowReadingCard } from './NowReadingCard';
+import { SortChips, type LibrarySort } from './SortChips';
+
+import type { BookCollection } from '../services/collectionsStorage';
+import type { ReadingState } from '../services/readingProgress';
+import type { Book } from '../types/book';
 
 type LibraryContentProps = {
   books: Book[];
@@ -54,7 +57,9 @@ export function LibraryContent({
   const { refreshLibrary } = useLibrary();
   const [filter, setFilter] = useState<LibraryFilter>('all');
   const [sort, setSort] = useState<LibrarySort>('title');
-  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
+  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
+    null,
+  );
   const [refreshing, setRefreshing] = useState(false);
 
   const visibleBooks = useMemo(
@@ -69,12 +74,16 @@ export function LibraryContent({
 
   const filteredBooks = useMemo(() => {
     const byStatus = filterBooks(visibleBooks, filter, states);
-    const byCollection = filterByCollection(byStatus, activeCollectionId, collections);
+    const byCollection = filterByCollection(
+      byStatus,
+      activeCollectionId,
+      collections,
+    );
     return sortBooks(byCollection, sort, states);
   }, [visibleBooks, filter, sort, states, activeCollectionId, collections]);
 
   const nowReadingProgress = nowReading
-    ? (states[nowReading.id]?.progress ?? 0)
+    ? states[nowReading.id]?.progress ?? 0
     : 0;
 
   const missingCount = books.filter(book => book.missing).length;
@@ -117,12 +126,19 @@ export function LibraryContent({
           refreshing={refreshing}
           tintColor={colors.primary}
         />
-      }>
+      }
+    >
       <View style={styles.section}>
         <Text style={[typography.displayTitle, { color: colors.onSurface }]}>
           Welcome back, Reader
         </Text>
-        <Text style={[typography.body, styles.subtitle, { color: colors.onSurfaceVariant }]}>
+        <Text
+          style={[
+            typography.body,
+            styles.subtitle,
+            { color: colors.onSurfaceVariant },
+          ]}
+        >
           Pick up where you left off
         </Text>
       </View>
@@ -131,13 +147,21 @@ export function LibraryContent({
         <View
           style={[
             styles.missingBanner,
-            { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant },
-          ]}>
+            {
+              backgroundColor: colors.surfaceContainerLow,
+              borderColor: colors.outlineVariant,
+            },
+          ]}
+        >
           <Text style={[typography.body, { color: colors.onSurface }]}>
-            {missingCount} book{missingCount === 1 ? '' : 's'} need to be located again.
+            {missingCount} book{missingCount === 1 ? '' : 's'} need to be
+            located again.
           </Text>
-          <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
-            Tap a missing book or re-select your library folder if access was revoked.
+          <Text
+            style={[typography.caption, { color: colors.onSurfaceVariant }]}
+          >
+            Tap a missing book or re-select your library folder if access was
+            revoked.
           </Text>
         </View>
       ) : null}

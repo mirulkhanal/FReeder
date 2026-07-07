@@ -6,6 +6,7 @@ import {
   TapGestureHandler,
   type TapGestureHandlerStateChangeEvent,
 } from 'react-native-gesture-handler';
+
 import type { TapZoneAction, TapZones } from '../../services/readerChromePrefs';
 
 type ReaderTapGestureWrapperProps = {
@@ -59,12 +60,14 @@ export function ReaderTapGestureWrapper({
       maxDeltaX={14}
       maxDeltaY={14}
       simultaneousHandlers={nativeRef}
-      onHandlerStateChange={handleTap}>
+      onHandlerStateChange={handleTap}
+    >
       <View
         style={styles.flex}
         onLayout={event => {
           layoutWidth.current = event.nativeEvent.layout.width;
-        }}>
+        }}
+      >
         <NativeViewGestureHandler ref={nativeRef} disallowInterruption>
           <View collapsable={false} style={styles.flex}>
             {children}

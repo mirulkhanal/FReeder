@@ -1,12 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { OpdsCatalog } from '../types/opds';
+
 import { generateBookId } from '../types/book';
+
 import {
   clearCatalogPassword,
-  loadCatalogPassword,
   migrateCatalogPassword,
   saveCatalogPassword,
 } from './opdsCredentials';
+
+import type { OpdsCatalog } from '../types/opds';
 
 const CATALOGS_KEY = '@freeder/opdsCatalogs';
 
@@ -34,7 +36,10 @@ export async function loadOpdsCatalogs(): Promise<OpdsCatalog[]> {
     const catalogs = JSON.parse(raw) as OpdsCatalog[];
     return Promise.all(
       catalogs.map(async catalog => {
-        const password = await migrateCatalogPassword(catalog.id, catalog.password);
+        const password = await migrateCatalogPassword(
+          catalog.id,
+          catalog.password,
+        );
         return { ...catalog, password };
       }),
     );
@@ -43,12 +48,15 @@ export async function loadOpdsCatalogs(): Promise<OpdsCatalog[]> {
   }
 }
 
-async function stripPasswordForStorage(catalog: OpdsCatalog): Promise<OpdsCatalog> {
+async function stripPasswordForStorage(
+  catalog: OpdsCatalog,
+): Promise<OpdsCatalog> {
   if (catalog.password) {
     await saveCatalogPassword(catalog.id, catalog.password);
   }
-  const { password: _password, ...rest } = catalog;
-  return rest;
+  const sanitized = { ...catalog };
+  delete sanitized.password;
+  return sanitized;
 }
 
 export async function saveOpdsCatalogs(catalogs: OpdsCatalog[]): Promise<void> {
@@ -72,7 +80,9 @@ export async function addOpdsCatalog(
   return next;
 }
 
-export async function removeOpdsCatalog(catalogId: string): Promise<OpdsCatalog[]> {
+export async function removeOpdsCatalog(
+  catalogId: string,
+): Promise<OpdsCatalog[]> {
   const catalogs = await loadOpdsCatalogs();
   const next = catalogs.filter(catalog => catalog.id !== catalogId);
   await clearCatalogPassword(catalogId);
@@ -101,7 +111,9 @@ export async function updateOpdsCatalog(
     throw new Error('Catalog URL is required.');
   }
 
-  if (catalogs.some(catalog => catalog.id !== catalogId && catalog.url === url)) {
+  if (
+    catalogs.some(catalog => catalog.id !== catalogId && catalog.url === url)
+  ) {
     throw new Error('Another catalog already uses this URL.');
   }
 
@@ -115,7 +127,9 @@ export async function updateOpdsCatalog(
       : input.password || undefined,
   };
 
-  const next = catalogs.map(catalog => (catalog.id === catalogId ? updated : catalog));
+  const next = catalogs.map(catalog =>
+    catalog.id === catalogId ? updated : catalog,
+  );
   await saveOpdsCatalogs(next);
   return next;
 }

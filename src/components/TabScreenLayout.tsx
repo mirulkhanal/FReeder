@@ -1,9 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useTheme } from '../theme';
+
 import { LibrarySearchBar } from './LibrarySearchBar';
 import { TopAppBar } from './TopAppBar';
-import { useTheme } from '../theme';
 
 type TabScreenLayoutProps = ViewProps & {
   children: React.ReactNode;
@@ -29,10 +31,12 @@ export function TabScreenLayout({
   return (
     <View
       style={[styles.root, { backgroundColor: colors.background }, style]}
-      {...rest}>
+      {...rest}
+    >
       <SafeAreaView
         edges={['top']}
-        style={[styles.headerSafe, { backgroundColor: colors.surface }]}>
+        style={[styles.headerSafe, { backgroundColor: colors.surface }]}
+      >
         <TopAppBar onSearchPress={onSearchPress} />
         {searchActive && onSearchQueryChange && onSearchClose ? (
           <LibrarySearchBar

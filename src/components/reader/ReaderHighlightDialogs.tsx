@@ -7,10 +7,12 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import type { Decoration } from 'react-native-readium';
-import type { HighlightStyleType } from './ReaderHighlightStyleModal';
+
 import { HIGHLIGHT_COLORS } from '../../hooks/useReaderHighlights';
 import { useTheme } from '../../theme';
+
+import type { HighlightStyleType } from './ReaderHighlightStyleModal';
+import type { Decoration } from 'react-native-readium';
 
 type ReaderHighlightColorModalProps = {
   visible: boolean;
@@ -37,14 +39,31 @@ export function ReaderHighlightColorModal({
   }, [visible]);
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
-          <Text style={[typography.headline, { color: colors.onSurface }]}>Add highlight</Text>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
+          <Text style={[typography.headline, { color: colors.onSurface }]}>
+            Add highlight
+          </Text>
           {selectedText ? (
             <Text
               numberOfLines={3}
-              style={[typography.body, styles.excerpt, { color: colors.onSurfaceVariant }]}>
+              style={[
+                typography.body,
+                styles.excerpt,
+                { color: colors.onSurfaceVariant },
+              ]}
+            >
               “{selectedText}”
             </Text>
           ) : null}
@@ -60,7 +79,8 @@ export function ReaderHighlightColorModal({
                   styles.colorSwatch,
                   {
                     backgroundColor: option,
-                    borderColor: color === option ? colors.primary : colors.outlineVariant,
+                    borderColor:
+                      color === option ? colors.primary : colors.outlineVariant,
                     borderWidth: color === option ? 2 : 1,
                   },
                 ]}
@@ -87,13 +107,20 @@ export function ReaderHighlightColorModal({
 
           <View style={styles.actions}>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={[typography.button, { color: colors.onSurfaceVariant }]}>Cancel</Text>
+              <Text
+                style={[typography.button, { color: colors.onSurfaceVariant }]}
+              >
+                Cancel
+              </Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
               onPress={() => onSave(color, note.trim())}
-              style={[styles.saveButton, { backgroundColor: colors.primary }]}>
-              <Text style={[typography.button, { color: colors.onPrimary }]}>Save</Text>
+              style={[styles.saveButton, { backgroundColor: colors.primary }]}
+            >
+              <Text style={[typography.button, { color: colors.onPrimary }]}>
+                Save
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -112,7 +139,12 @@ type ReaderHighlightEditModalProps = {
   visible: boolean;
   highlight: Decoration | null;
   onClose: () => void;
-  onSave: (id: string, color: string, note: string, styleType: HighlightStyleType) => void;
+  onSave: (
+    id: string,
+    color: string,
+    note: string,
+    styleType: HighlightStyleType,
+  ) => void;
   onDelete: (id: string) => void;
 };
 
@@ -132,10 +164,19 @@ export function ReaderHighlightEditModal({
     if (visible && highlight) {
       setColor(highlight.style.tint ?? HIGHLIGHT_COLORS[0]);
       setNote(highlight.extras?.note ?? '');
-      const stored = highlight.extras?.styleType as HighlightStyleType | undefined;
-      if (stored === 'highlight' || stored === 'underline' || stored === 'squiggly') {
+      const stored = highlight.extras?.styleType as
+        | HighlightStyleType
+        | undefined;
+      if (
+        stored === 'highlight' ||
+        stored === 'underline' ||
+        stored === 'squiggly'
+      ) {
         setStyleType(stored);
-      } else if (highlight.style.type === 'underline' || highlight.style.type === 'squiggly') {
+      } else if (
+        highlight.style.type === 'underline' ||
+        highlight.style.type === 'squiggly'
+      ) {
         setStyleType(highlight.style.type);
       } else {
         setStyleType('highlight');
@@ -153,13 +194,30 @@ export function ReaderHighlightEditModal({
     'Highlight';
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
-          <Text style={[typography.headline, { color: colors.onSurface }]}>Edit highlight</Text>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
+          <Text style={[typography.headline, { color: colors.onSurface }]}>
+            Edit highlight
+          </Text>
           <Text
             numberOfLines={3}
-            style={[typography.body, styles.excerpt, { color: colors.onSurfaceVariant }]}>
+            style={[
+              typography.body,
+              styles.excerpt,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
             {excerpt}
           </Text>
 
@@ -174,19 +232,27 @@ export function ReaderHighlightEditModal({
                   styles.styleChip,
                   {
                     backgroundColor:
-                      styleType === option.id ? colors.primary : colors.surfaceContainerLow,
+                      styleType === option.id
+                        ? colors.primary
+                        : colors.surfaceContainerLow,
                     borderColor:
-                      styleType === option.id ? colors.primary : colors.outlineVariant,
+                      styleType === option.id
+                        ? colors.primary
+                        : colors.outlineVariant,
                   },
-                ]}>
+                ]}
+              >
                 <Text
                   style={[
                     typography.caption,
                     {
                       color:
-                        styleType === option.id ? colors.onPrimary : colors.onSurfaceVariant,
+                        styleType === option.id
+                          ? colors.onPrimary
+                          : colors.onSurfaceVariant,
                     },
-                  ]}>
+                  ]}
+                >
                   {option.label}
                 </Text>
               </Pressable>
@@ -204,7 +270,8 @@ export function ReaderHighlightEditModal({
                   styles.colorSwatch,
                   {
                     backgroundColor: option,
-                    borderColor: color === option ? colors.primary : colors.outlineVariant,
+                    borderColor:
+                      color === option ? colors.primary : colors.outlineVariant,
                     borderWidth: color === option ? 2 : 1,
                   },
                 ]}
@@ -230,18 +297,35 @@ export function ReaderHighlightEditModal({
           />
 
           <View style={styles.actions}>
-            <Pressable accessibilityRole="button" onPress={() => onDelete(highlight.id)}>
-              <Text style={[typography.button, { color: colors.error }]}>Delete</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => onDelete(highlight.id)}
+            >
+              <Text style={[typography.button, { color: colors.error }]}>
+                Delete
+              </Text>
             </Pressable>
             <View style={styles.actionsRight}>
               <Pressable accessibilityRole="button" onPress={onClose}>
-                <Text style={[typography.button, { color: colors.onSurfaceVariant }]}>Cancel</Text>
+                <Text
+                  style={[
+                    typography.button,
+                    { color: colors.onSurfaceVariant },
+                  ]}
+                >
+                  Cancel
+                </Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                onPress={() => onSave(highlight.id, color, note.trim(), styleType)}
-                style={[styles.saveButton, { backgroundColor: colors.primary }]}>
-                <Text style={[typography.button, { color: colors.onPrimary }]}>Save</Text>
+                onPress={() =>
+                  onSave(highlight.id, color, note.trim(), styleType)
+                }
+                style={[styles.saveButton, { backgroundColor: colors.primary }]}
+              >
+                <Text style={[typography.button, { color: colors.onPrimary }]}>
+                  Save
+                </Text>
               </Pressable>
             </View>
           </View>

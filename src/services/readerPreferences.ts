@@ -1,5 +1,6 @@
-import type { Preferences } from 'react-native-readium';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import type { Preferences } from 'react-native-readium';
 
 const PREFS_KEY = '@freeder/readerPreferences';
 
@@ -59,7 +60,9 @@ export async function loadReaderPreferences(): Promise<ReaderPreferences> {
     return DEFAULT_READER_PREFERENCES;
   }
   try {
-    const stored = JSON.parse(raw) as Partial<ReaderPreferences> & { scroll?: boolean };
+    const stored = JSON.parse(raw) as Partial<ReaderPreferences> & {
+      scroll?: boolean;
+    };
     const readingMode =
       stored.readingMode ??
       (stored.scroll ? 'scroll' : DEFAULT_READER_PREFERENCES.readingMode);

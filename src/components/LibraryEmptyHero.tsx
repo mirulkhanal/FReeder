@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../theme';
 
 type LibraryEmptyHeroProps = {
@@ -45,7 +46,9 @@ export function LibraryEmptyHero({
 
   return (
     <View style={styles.wrapper}>
-      <Animated.View style={[styles.hero, { transform: [{ translateY: float }] }]}>
+      <Animated.View
+        style={[styles.hero, { transform: [{ translateY: float }] }]}
+      >
         <View
           style={[
             styles.glow,
@@ -61,7 +64,8 @@ export function LibraryEmptyHero({
                 borderColor: 'rgba(255,255,255,0.4)',
                 shadowColor: '#000',
               },
-            ]}>
+            ]}
+          >
             <View
               style={[
                 styles.dashedBox,
@@ -69,7 +73,8 @@ export function LibraryEmptyHero({
                   backgroundColor: colors.surfaceContainer,
                   borderColor: colors.outlineVariant,
                 },
-              ]}>
+              ]}
+            >
               <Icon name="menu-book" size={48} color={colors.outline} />
               <Icon name="add-circle" size={28} color={colors.primary} />
             </View>
@@ -90,10 +95,22 @@ export function LibraryEmptyHero({
       </Animated.View>
 
       <View style={styles.copy}>
-        <Text style={[typography.headline, styles.title, { color: colors.onSurface }]}>
+        <Text
+          style={[
+            typography.headline,
+            styles.title,
+            { color: colors.onSurface },
+          ]}
+        >
           Your library is empty
         </Text>
-        <Text style={[typography.body, styles.description, { color: colors.onSurfaceVariant }]}>
+        <Text
+          style={[
+            typography.body,
+            styles.description,
+            { color: colors.onSurfaceVariant },
+          ]}
+        >
           Import DRM-free EPUB files from a folder or add them one at a time.
         </Text>
       </View>
@@ -110,7 +127,8 @@ export function LibraryEmptyHero({
             opacity: pressed ? 0.95 : 1,
             transform: [{ scale: pressed ? 0.97 : 1 }],
           },
-        ]}>
+        ]}
+      >
         {loading ? (
           <ActivityIndicator color={colors.onPrimary} />
         ) : (
@@ -133,11 +151,13 @@ export function LibraryEmptyHero({
             borderColor: colors.outlineVariant,
             opacity: pressed ? 0.92 : 1,
           },
-        ]}>
+        ]}
+      >
         <Icon name="upload-file" size={20} color={colors.primary} />
-        <Text style={[typography.button, { color: colors.primary }]}>Add EPUB file</Text>
+        <Text style={[typography.button, { color: colors.primary }]}>
+          Add EPUB file
+        </Text>
       </Pressable>
-
     </View>
   );
 }
@@ -159,7 +179,7 @@ const styles = StyleSheet.create({
     width: 256,
   },
   glow: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: 999,
   },
   heroInner: {

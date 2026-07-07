@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../theme';
 
 type SettingsProgressCardProps = {
@@ -8,11 +9,16 @@ type SettingsProgressCardProps = {
   onRestore: () => void;
 };
 
-export function SettingsProgressCard({ onBackup, onRestore }: SettingsProgressCardProps) {
+export function SettingsProgressCard({
+  onBackup,
+  onRestore,
+}: SettingsProgressCardProps) {
   const { colors, typography } = useTheme();
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surfaceContainerLowest }]}>
+    <View
+      style={[styles.card, { backgroundColor: colors.surfaceContainerLowest }]}
+    >
       <Pressable
         accessibilityRole="button"
         onPress={onBackup}
@@ -22,7 +28,8 @@ export function SettingsProgressCard({ onBackup, onRestore }: SettingsProgressCa
             backgroundColor: pressed ? colors.primary : colors.primary,
             opacity: pressed ? 0.9 : 1,
           },
-        ]}>
+        ]}
+      >
         <Icon name="backup" size={20} color={colors.onPrimary} />
         <Text style={[typography.button, { color: colors.onPrimary }]}>
           Back up progress on device
@@ -35,10 +42,13 @@ export function SettingsProgressCard({ onBackup, onRestore }: SettingsProgressCa
         style={({ pressed }) => [
           styles.secondaryButton,
           {
-            backgroundColor: pressed ? colors.surfaceContainerHigh : colors.surfaceContainerLow,
+            backgroundColor: pressed
+              ? colors.surfaceContainerHigh
+              : colors.surfaceContainerLow,
             borderColor: colors.outlineVariant,
           },
-        ]}>
+        ]}
+      >
         <Icon name="restore" size={20} color={colors.onSurfaceVariant} />
         <Text style={[typography.button, { color: colors.onSurfaceVariant }]}>
           Restore last backup

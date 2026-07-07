@@ -7,9 +7,11 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { Link } from 'react-native-readium';
-import type { TocLink } from '../../utils/readiumNavigation';
+
 import { useTheme } from '../../theme';
+
+import type { TocLink } from '../../utils/readiumNavigation';
+import type { Link } from 'react-native-readium';
 
 type ReaderTocModalProps = {
   visible: boolean;
@@ -27,20 +29,34 @@ export function ReaderTocModal({
   const { colors, typography } = useTheme();
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
             <Text style={[typography.headline, { color: colors.onSurface }]}>
               Table of contents
             </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Close</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Close
+              </Text>
             </Pressable>
           </View>
           <ScrollView contentContainerStyle={styles.list}>
             {links.length === 0 ? (
-              <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[typography.body, { color: colors.onSurfaceVariant }]}
+              >
                 No chapters available for this book.
               </Text>
             ) : (
@@ -82,19 +98,25 @@ function TocTree({
               styles.item,
               { paddingLeft: 12 + depth * 16 },
               pressed && { backgroundColor: colors.surfaceContainerHigh },
-            ]}>
+            ]}
+          >
             <Text
               numberOfLines={2}
               style={[
                 typography.body,
                 depth > 0 && styles.nestedTitle,
                 { color: colors.onSurface },
-              ]}>
+              ]}
+            >
               {link.title || link.href}
             </Text>
           </Pressable>
           {link.children && link.children.length > 0 ? (
-            <TocTree depth={depth + 1} links={link.children} onSelect={onSelect} />
+            <TocTree
+              depth={depth + 1}
+              links={link.children}
+              onSelect={onSelect}
+            />
           ) : null}
         </View>
       ))}

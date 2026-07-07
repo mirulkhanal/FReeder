@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../theme';
 
 type LibrarySearchBarProps = {
@@ -25,7 +26,8 @@ export function LibrarySearchBar({
             backgroundColor: colors.surfaceContainerLow,
             borderColor: colors.outlineVariant,
           },
-        ]}>
+        ]}
+      >
         <Icon name="search" size={20} color={colors.onSurfaceVariant} />
         <TextInput
           autoCapitalize="none"
@@ -47,7 +49,8 @@ export function LibrarySearchBar({
         style={({ pressed }) => [
           styles.closeButton,
           pressed && { backgroundColor: colors.surfaceContainerHigh },
-        ]}>
+        ]}
+      >
         <Icon name="close" size={22} color={colors.onSurfaceVariant} />
       </Pressable>
     </View>

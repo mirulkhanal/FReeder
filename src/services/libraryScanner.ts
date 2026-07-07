@@ -1,4 +1,5 @@
 import { FileSystem, Util } from 'react-native-file-access';
+
 import type { ScannedBookEntry } from './libraryMerge';
 
 const EPUB_EXTENSION = '.epub';
@@ -42,7 +43,9 @@ async function scanDirectory(dirUri: string): Promise<ScannedBookEntry[]> {
   return books.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export async function scanLibraryFolder(folderUri: string): Promise<ScannedBookEntry[]> {
+export async function scanLibraryFolder(
+  folderUri: string,
+): Promise<ScannedBookEntry[]> {
   return scanDirectory(folderUri);
 }
 

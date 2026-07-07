@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+
 import {
   registerThemedDialogHost,
   type DialogButton,
@@ -44,26 +45,53 @@ export function ThemedDialogHost() {
         } else {
           dismiss();
         }
-      }}>
-      <Pressable accessibilityRole="button" onPress={dismiss} style={styles.backdrop}>
+      }}
+    >
+      <Pressable
+        accessibilityRole="button"
+        onPress={dismiss}
+        style={styles.backdrop}
+      >
         <Pressable
           accessibilityRole="none"
           onPress={event => event.stopPropagation()}
-          style={[styles.card, { backgroundColor: colors.surfaceContainerLowest }]}>
-          <Text style={[typography.titleMd, styles.title, { color: colors.onSurface }]}>
+          style={[
+            styles.card,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
+          <Text
+            style={[
+              typography.titleMd,
+              styles.title,
+              { color: colors.onSurface },
+            ]}
+          >
             {request?.title}
           </Text>
           {request?.message ? (
-            <Text style={[typography.body, styles.message, { color: colors.onSurfaceVariant }]}>
+            <Text
+              style={[
+                typography.body,
+                styles.message,
+                { color: colors.onSurfaceVariant },
+              ]}
+            >
               {request.message}
             </Text>
           ) : null}
 
-          <View style={[styles.actions, stacked ? styles.actionsStacked : styles.actionsRow]}>
+          <View
+            style={[
+              styles.actions,
+              stacked ? styles.actionsStacked : styles.actionsRow,
+            ]}
+          >
             {buttons.map(button => {
               const destructive = button.style === 'destructive';
               const cancel = button.style === 'cancel';
-              const filled = !cancel && !destructive && !stacked && buttons.length === 2;
+              const filled =
+                !cancel && !destructive && !stacked && buttons.length === 2;
 
               return (
                 <Pressable
@@ -73,17 +101,24 @@ export function ThemedDialogHost() {
                   style={({ pressed }) => [
                     stacked ? styles.actionStacked : styles.actionInline,
                     filled
-                      ? { backgroundColor: pressed ? colors.primaryContainer : colors.primary }
+                      ? {
+                          backgroundColor: pressed
+                            ? colors.primaryContainer
+                            : colors.primary,
+                        }
                       : {
                           backgroundColor: pressed
                             ? colors.surfaceContainerHigh
                             : destructive
-                              ? 'rgba(255, 218, 214, 0.12)'
-                              : colors.surfaceContainerLow,
-                          borderColor: destructive ? colors.error : colors.outlineVariant,
+                            ? 'rgba(255, 218, 214, 0.12)'
+                            : colors.surfaceContainerLow,
+                          borderColor: destructive
+                            ? colors.error
+                            : colors.outlineVariant,
                           borderWidth: destructive || cancel ? 1 : 0,
                         },
-                  ]}>
+                  ]}
+                >
                   <Text
                     style={[
                       typography.button,
@@ -91,13 +126,14 @@ export function ThemedDialogHost() {
                         color: filled
                           ? colors.onPrimary
                           : destructive
-                            ? colors.error
-                            : cancel
-                              ? colors.onSurfaceVariant
-                              : colors.primary,
+                          ? colors.error
+                          : cancel
+                          ? colors.onSurfaceVariant
+                          : colors.primary,
                         textAlign: stacked ? 'left' : 'center',
                       },
-                    ]}>
+                    ]}
+                  >
                     {button.text}
                   </Text>
                 </Pressable>

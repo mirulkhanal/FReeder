@@ -1,11 +1,18 @@
-import type { Book } from '../types/book';
-import { extractEpubMetadata, getCachedCoverUri, isCoverUriValid } from './epubCover';
 import { hashBookFile } from './duplicateDetection';
+import {
+  extractEpubMetadata,
+  getCachedCoverUri,
+  isCoverUriValid,
+} from './epubCover';
+
+import type { Book } from '../types/book';
 
 const ENRICH_CONCURRENCY = 1;
 
 export async function enrichBook(book: Book): Promise<Book> {
-  const hasValidCover = book.coverUri ? await isCoverUriValid(book.coverUri) : false;
+  const hasValidCover = book.coverUri
+    ? await isCoverUriValid(book.coverUri)
+    : false;
   const bookToEnrich = hasValidCover ? book : { ...book, coverUri: undefined };
 
   let enriched = bookToEnrich;
@@ -27,7 +34,10 @@ export async function enrichBook(book: Book): Promise<Book> {
   }
 
   try {
-    const metadata = await extractEpubMetadata(enriched.fileUrl, enriched.fileName);
+    const metadata = await extractEpubMetadata(
+      enriched.fileUrl,
+      enriched.fileName,
+    );
     return {
       ...enriched,
       title: metadata.title ?? enriched.title,

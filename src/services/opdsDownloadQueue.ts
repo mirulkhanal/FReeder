@@ -49,6 +49,8 @@ export function removeDownloadItem(id: string): void {
 }
 
 export function clearFinishedDownloads(): void {
-  queue = queue.filter(item => item.status === 'queued' || item.status === 'downloading');
+  queue = queue.filter(
+    item => item.status === 'queued' || item.status === 'downloading',
+  );
   notify();
 }

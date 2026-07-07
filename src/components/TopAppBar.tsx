@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../theme';
 
 type TopAppBarProps = {
@@ -20,17 +21,43 @@ export function TopAppBar({ onSearchPress }: TopAppBarProps) {
               backgroundColor: colors.primary,
               shadowColor: colors.primary,
             },
-          ]}>
-          <View style={[styles.logoMarkInner, { backgroundColor: colors.primaryContainer }]} />
-          <Icon name="auto-stories" size={22} color={colors.onPrimary} style={styles.logoIcon} />
+          ]}
+        >
+          <View
+            style={[
+              styles.logoMarkInner,
+              { backgroundColor: colors.primaryContainer },
+            ]}
+          />
+          <Icon
+            name="auto-stories"
+            size={22}
+            color={colors.onPrimary}
+            style={styles.logoIcon}
+          />
         </View>
         <View style={styles.brandText}>
           <View style={styles.wordmarkRow}>
-            <Text style={[styles.wordmarkAccent, { color: colors.primary }]}>F</Text>
-            <Text style={[styles.wordmarkRest, { color: colors.onSurface }]}>Reeder</Text>
-            <View style={[styles.wordmarkDot, { backgroundColor: colors.tertiaryFixedDim }]} />
+            <Text style={[styles.wordmarkAccent, { color: colors.primary }]}>
+              F
+            </Text>
+            <Text style={[styles.wordmarkRest, { color: colors.onSurface }]}>
+              Reeder
+            </Text>
+            <View
+              style={[
+                styles.wordmarkDot,
+                { backgroundColor: colors.tertiaryFixedDim },
+              ]}
+            />
           </View>
-          <Text style={[typography.caption, styles.tagline, { color: colors.onSurfaceVariant }]}>
+          <Text
+            style={[
+              typography.caption,
+              styles.tagline,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
             Read freely
           </Text>
         </View>
@@ -43,7 +70,8 @@ export function TopAppBar({ onSearchPress }: TopAppBarProps) {
           style={({ pressed }) => [
             styles.iconButton,
             pressed && { backgroundColor: colors.surfaceContainerHigh },
-          ]}>
+          ]}
+        >
           <Icon name="search" size={24} color={colors.onSurfaceVariant} />
         </Pressable>
       ) : (

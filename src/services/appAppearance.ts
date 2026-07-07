@@ -14,6 +14,8 @@ export async function loadAppAppearance(): Promise<AppAppearanceMode> {
   return DEFAULT_APP_APPEARANCE;
 }
 
-export async function saveAppAppearance(mode: AppAppearanceMode): Promise<void> {
+export async function saveAppAppearance(
+  mode: AppAppearanceMode,
+): Promise<void> {
   await AsyncStorage.setItem(APPEARANCE_KEY, mode);
 }

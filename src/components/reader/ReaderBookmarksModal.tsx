@@ -8,9 +8,11 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import type { Locator } from 'react-native-readium';
-import type { BookBookmark } from '../../services/bookBookmarks';
+
 import { useTheme } from '../../theme';
+
+import type { BookBookmark } from '../../services/bookBookmarks';
+import type { Locator } from 'react-native-readium';
 
 type ReaderBookmarksModalProps = {
   visible: boolean;
@@ -34,13 +36,27 @@ export function ReaderBookmarksModal({
   const { colors, typography } = useTheme();
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
-            <Text style={[typography.headline, { color: colors.onSurface }]}>Bookmarks</Text>
+            <Text style={[typography.headline, { color: colors.onSurface }]}>
+              Bookmarks
+            </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Close</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Close
+              </Text>
             </Pressable>
           </View>
 
@@ -50,10 +66,13 @@ export function ReaderBookmarksModal({
             style={({ pressed }) => [
               styles.addButton,
               {
-                backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainerLow,
+                backgroundColor: pressed
+                  ? colors.primaryContainer
+                  : colors.surfaceContainerLow,
                 borderColor: colors.outlineVariant,
               },
-            ]}>
+            ]}
+          >
             <Icon name="bookmark-add" size={20} color={colors.primary} />
             <Text style={[typography.button, { color: colors.primary }]}>
               Save bookmark ({Math.round(currentProgress * 100)}%)
@@ -62,14 +81,21 @@ export function ReaderBookmarksModal({
 
           <ScrollView contentContainerStyle={styles.list}>
             {bookmarks.length === 0 ? (
-              <Text style={[typography.body, styles.empty, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[
+                  typography.body,
+                  styles.empty,
+                  { color: colors.onSurfaceVariant },
+                ]}
+              >
                 No bookmarks yet. Save your current page to return later.
               </Text>
             ) : (
               bookmarks.map(bookmark => (
                 <View
                   key={bookmark.id}
-                  style={[styles.item, { borderColor: colors.outlineVariant }]}>
+                  style={[styles.item, { borderColor: colors.outlineVariant }]}
+                >
                   <Pressable
                     accessibilityRole="button"
                     onPress={() => {
@@ -78,14 +104,26 @@ export function ReaderBookmarksModal({
                     }}
                     style={({ pressed }) => [
                       styles.itemBody,
-                      pressed && { backgroundColor: colors.surfaceContainerHigh },
-                    ]}>
+                      pressed && {
+                        backgroundColor: colors.surfaceContainerHigh,
+                      },
+                    ]}
+                  >
                     <Text
                       numberOfLines={2}
-                      style={[typography.body, { color: colors.onSurface, flex: 1 }]}>
+                      style={[
+                        typography.body,
+                        { color: colors.onSurface, flex: 1 },
+                      ]}
+                    >
                       {bookmark.label}
                     </Text>
-                    <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+                    <Text
+                      style={[
+                        typography.caption,
+                        { color: colors.onSurfaceVariant },
+                      ]}
+                    >
                       {Math.round(bookmark.progress * 100)}%
                     </Text>
                   </Pressable>
@@ -94,8 +132,13 @@ export function ReaderBookmarksModal({
                     accessibilityRole="button"
                     hitSlop={8}
                     onPress={() => onDelete(bookmark.id)}
-                    style={styles.deleteButton}>
-                    <Icon name="delete-outline" size={20} color={colors.onSurfaceVariant} />
+                    style={styles.deleteButton}
+                  >
+                    <Icon
+                      name="delete-outline"
+                      size={20}
+                      color={colors.onSurfaceVariant}
+                    />
                   </Pressable>
                 </View>
               ))

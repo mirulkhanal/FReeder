@@ -8,8 +8,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import type { OpdsCatalog } from '../../types/opds';
+
 import { useTheme } from '../../theme';
+
+import type { OpdsCatalog } from '../../types/opds';
 
 export type CatalogFormValues = {
   url: string;
@@ -76,15 +78,27 @@ export function AddCatalogModal({
   };
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={handleClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={handleClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
             <Text style={[typography.headline, { color: colors.onSurface }]}>
               {isEditing ? 'Edit catalog' : 'Add OPDS catalog'}
             </Text>
             <Pressable accessibilityRole="button" onPress={handleClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Cancel</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Cancel
+              </Text>
             </Pressable>
           </View>
 
@@ -101,7 +115,11 @@ export function AddCatalogModal({
                 value={url}
               />
             </Field>
-            <Field label="Display name (optional)" typography={typography} colors={colors}>
+            <Field
+              label="Display name (optional)"
+              typography={typography}
+              colors={colors}
+            >
               <TextInput
                 onChangeText={setTitle}
                 placeholder="My library"
@@ -110,7 +128,11 @@ export function AddCatalogModal({
                 value={title}
               />
             </Field>
-            <Field label="Username (optional)" typography={typography} colors={colors}>
+            <Field
+              label="Username (optional)"
+              typography={typography}
+              colors={colors}
+            >
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -121,13 +143,19 @@ export function AddCatalogModal({
                 value={username}
               />
             </Field>
-            <Field label="Password (optional)" typography={typography} colors={colors}>
+            <Field
+              label="Password (optional)"
+              typography={typography}
+              colors={colors}
+            >
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
                 onChangeText={setPassword}
                 placeholder={
-                  isEditing ? 'Leave blank to keep current password' : 'Stored on this device only'
+                  isEditing
+                    ? 'Leave blank to keep current password'
+                    : 'Stored on this device only'
                 }
                 placeholderTextColor={colors.onSurfaceVariant}
                 secureTextEntry
@@ -137,16 +165,23 @@ export function AddCatalogModal({
             </Field>
           </ScrollView>
 
-          <Text style={[typography.caption, styles.hint, { color: colors.onSurfaceVariant }]}>
-            Komga / Tailscale: use http://100.x.x.x:25600/opds/v1.2/catalog or the full
-            .ts.net hostname if a short name like meebian fails. Add your Komga username and
-            password when the server requires login.
+          <Text
+            style={[
+              typography.caption,
+              styles.hint,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
+            Komga / Tailscale: use http://100.x.x.x:25600/opds/v1.2/catalog or
+            the full .ts.net hostname if a short name like meebian fails. Add
+            your Komga username and password when the server requires login.
           </Text>
 
           <Pressable
             accessibilityRole="button"
             onPress={handleSubmit}
-            style={[styles.submit, { backgroundColor: colors.primary }]}>
+            style={[styles.submit, { backgroundColor: colors.primary }]}
+          >
             <Text style={[typography.button, { color: colors.onPrimary }]}>
               {isEditing ? 'Save changes' : 'Add catalog'}
             </Text>
@@ -170,7 +205,9 @@ function Field({
 }) {
   return (
     <View style={styles.field}>
-      <Text style={[typography.caption, styles.label, { color: colors.outline }]}>
+      <Text
+        style={[typography.caption, styles.label, { color: colors.outline }]}
+      >
         {label.toUpperCase()}
       </Text>
       {children}

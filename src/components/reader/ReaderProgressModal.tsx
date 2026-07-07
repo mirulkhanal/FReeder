@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Modal,
   PanResponder,
@@ -8,13 +14,17 @@ import {
   View,
   type LayoutChangeEvent,
 } from 'react-native';
-import type { Locator } from 'react-native-readium';
+
 import { useTheme } from '../../theme';
+
+import type { Locator } from 'react-native-readium';
 
 const PROGRESS_MARKS = [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1];
 
 function positionProgress(locator: Locator): number {
-  return locator.locations?.totalProgression ?? locator.locations?.progression ?? 0;
+  return (
+    locator.locations?.totalProgression ?? locator.locations?.progression ?? 0
+  );
 }
 
 function nearestPositionIndex(positions: Locator[], progress: number): number {
@@ -118,29 +128,54 @@ export function ReaderProgressModal({
       : 'No positions available';
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <Text style={[typography.headline, { color: colors.onSurface }]}>
             Jump to position
           </Text>
-          <Text style={[typography.body, styles.current, { color: colors.onSurfaceVariant }]}>
+          <Text
+            style={[
+              typography.body,
+              styles.current,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
             Currently at {percent}%
           </Text>
 
           {positions.length > 1 ? (
             <View style={styles.sliderSection}>
-              <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[typography.caption, { color: colors.onSurfaceVariant }]}
+              >
                 {positionLabel}
               </Text>
               <View
                 {...panResponder.panHandlers}
                 onLayout={handleTrackLayout}
-                style={[styles.track, { backgroundColor: colors.surfaceContainerHighest }]}>
+                style={[
+                  styles.track,
+                  { backgroundColor: colors.surfaceContainerHighest },
+                ]}
+              >
                 <View
                   style={[
                     styles.trackFill,
-                    { backgroundColor: colors.primary, width: `${Math.round(sliderProgress * 100)}%` },
+                    {
+                      backgroundColor: colors.primary,
+                      width: `${Math.round(sliderProgress * 100)}%`,
+                    },
                   ]}
                 />
                 {trackWidth > 0 ? (
@@ -177,22 +212,36 @@ export function ReaderProgressModal({
                       backgroundColor: selected
                         ? colors.primary
                         : colors.surfaceContainerLow,
-                      borderColor: selected ? colors.primary : colors.outlineVariant,
+                      borderColor: selected
+                        ? colors.primary
+                        : colors.outlineVariant,
                     },
-                  ]}>
+                  ]}
+                >
                   <Text
                     style={[
                       typography.caption,
-                      { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-                    ]}>
+                      {
+                        color: selected
+                          ? colors.onPrimary
+                          : colors.onSurfaceVariant,
+                      },
+                    ]}
+                  >
                     {label}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
-          <Pressable accessibilityRole="button" onPress={onClose} style={styles.close}>
-            <Text style={[typography.button, { color: colors.primary }]}>Close</Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onClose}
+            style={styles.close}
+          >
+            <Text style={[typography.button, { color: colors.primary }]}>
+              Close
+            </Text>
           </Pressable>
         </View>
       </View>

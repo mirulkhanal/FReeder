@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import {
   createCollection,
   deleteCollection,
@@ -17,8 +18,9 @@ import {
   type BookCollection,
 } from '../../services/collectionsStorage';
 import { showThemedDialog } from '../../services/themedDialog';
-import type { Book } from '../../types/book';
 import { useTheme } from '../../theme';
+
+import type { Book } from '../../types/book';
 
 type CollectionsModalProps = {
   visible: boolean;
@@ -52,7 +54,9 @@ export function CollectionsModal({
 
     if (book) {
       const ids = new Set(
-        collections.filter(collection => collection.bookIds.includes(book.id)).map(c => c.id),
+        collections
+          .filter(collection => collection.bookIds.includes(book.id))
+          .map(c => c.id),
       );
       setSelectedIds(ids);
     } else {
@@ -144,18 +148,38 @@ export function CollectionsModal({
   const title = book ? `Add to collection` : 'Manage collections';
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={handleClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={handleClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
-            <Text style={[typography.headline, { color: colors.onSurface }]}>{title}</Text>
+            <Text style={[typography.headline, { color: colors.onSurface }]}>
+              {title}
+            </Text>
             <Pressable accessibilityRole="button" onPress={handleClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Cancel</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Cancel
+              </Text>
             </Pressable>
           </View>
 
           {book ? (
-            <Text style={[typography.body, styles.bookTitle, { color: colors.onSurfaceVariant }]}>
+            <Text
+              style={[
+                typography.body,
+                styles.bookTitle,
+                { color: colors.onSurfaceVariant },
+              ]}
+            >
               {book.title}
             </Text>
           ) : null}
@@ -183,20 +207,27 @@ export function CollectionsModal({
               style={[
                 styles.createButton,
                 {
-                  backgroundColor: newName.trim() ? colors.primary : colors.surfaceContainerHigh,
+                  backgroundColor: newName.trim()
+                    ? colors.primary
+                    : colors.surfaceContainerHigh,
                 },
-              ]}>
+              ]}
+            >
               <Icon
                 name="add"
                 size={22}
-                color={newName.trim() ? colors.onPrimary : colors.onSurfaceVariant}
+                color={
+                  newName.trim() ? colors.onPrimary : colors.onSurfaceVariant
+                }
               />
             </Pressable>
           </View>
 
           <ScrollView contentContainerStyle={styles.list}>
             {collections.length === 0 ? (
-              <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[typography.body, { color: colors.onSurfaceVariant }]}
+              >
                 No collections yet. Create one above.
               </Text>
             ) : (
@@ -213,17 +244,25 @@ export function CollectionsModal({
                         backgroundColor: colors.surfaceContainerLow,
                         borderColor: colors.outlineVariant,
                       },
-                    ]}>
+                    ]}
+                  >
                     {book ? (
                       <Pressable
                         accessibilityRole="checkbox"
                         accessibilityState={{ checked: isSelected }}
                         onPress={() => toggleSelection(collection.id)}
-                        style={styles.checkboxArea}>
+                        style={styles.checkboxArea}
+                      >
                         <Icon
-                          name={isSelected ? 'check-box' : 'check-box-outline-blank'}
+                          name={
+                            isSelected ? 'check-box' : 'check-box-outline-blank'
+                          }
                           size={24}
-                          color={isSelected ? colors.primary : colors.onSurfaceVariant}
+                          color={
+                            isSelected
+                              ? colors.primary
+                              : colors.onSurfaceVariant
+                          }
                         />
                       </Pressable>
                     ) : null}
@@ -245,10 +284,20 @@ export function CollectionsModal({
                       />
                     ) : (
                       <View style={styles.collectionMeta}>
-                        <Text style={[typography.titleMd, { color: colors.onSurface }]}>
+                        <Text
+                          style={[
+                            typography.titleMd,
+                            { color: colors.onSurface },
+                          ]}
+                        >
                           {collection.name}
                         </Text>
-                        <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+                        <Text
+                          style={[
+                            typography.caption,
+                            { color: colors.onSurfaceVariant },
+                          ]}
+                        >
                           {collection.bookIds.length} book
                           {collection.bookIds.length === 1 ? '' : 's'}
                         </Text>
@@ -257,20 +306,33 @@ export function CollectionsModal({
 
                     <View style={styles.actions}>
                       {isEditing ? (
-                        <Pressable accessibilityRole="button" onPress={handleSaveEdit}>
+                        <Pressable
+                          accessibilityRole="button"
+                          onPress={handleSaveEdit}
+                        >
                           <Icon name="check" size={22} color={colors.primary} />
                         </Pressable>
                       ) : (
                         <Pressable
                           accessibilityRole="button"
-                          onPress={() => handleStartEdit(collection)}>
-                          <Icon name="edit" size={20} color={colors.onSurfaceVariant} />
+                          onPress={() => handleStartEdit(collection)}
+                        >
+                          <Icon
+                            name="edit"
+                            size={20}
+                            color={colors.onSurfaceVariant}
+                          />
                         </Pressable>
                       )}
                       <Pressable
                         accessibilityRole="button"
-                        onPress={() => handleDelete(collection)}>
-                        <Icon name="delete-outline" size={20} color={colors.error} />
+                        onPress={() => handleDelete(collection)}
+                      >
+                        <Icon
+                          name="delete-outline"
+                          size={20}
+                          color={colors.error}
+                        />
                       </Pressable>
                     </View>
                   </View>
@@ -283,8 +345,11 @@ export function CollectionsModal({
             <Pressable
               accessibilityRole="button"
               onPress={handleSaveBook}
-              style={[styles.submit, { backgroundColor: colors.primary }]}>
-              <Text style={[typography.button, { color: colors.onPrimary }]}>Save</Text>
+              style={[styles.submit, { backgroundColor: colors.primary }]}
+            >
+              <Text style={[typography.button, { color: colors.onPrimary }]}>
+                Save
+              </Text>
             </Pressable>
           ) : null}
         </View>

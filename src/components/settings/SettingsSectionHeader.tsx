@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../theme';
 
 type SettingsSectionHeaderProps = {
@@ -19,7 +20,9 @@ export function SettingsSectionHeader({
   return (
     <View style={styles.row}>
       <Icon name={icon} size={20} color={iconColor ?? colors.primary} />
-      <Text style={[typography.titleMd, { color: colors.onSurface }]}>{title}</Text>
+      <Text style={[typography.titleMd, { color: colors.onSurface }]}>
+        {title}
+      </Text>
     </View>
   );
 }

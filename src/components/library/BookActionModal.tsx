@@ -1,8 +1,10 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import type { Book } from '../../types/book';
+
 import { useTheme } from '../../theme';
+
+import type { Book } from '../../types/book';
 
 export type BookActionId =
   | 'collection'
@@ -24,10 +26,19 @@ const ACTIONS: Array<{
   icon: string;
   destructive?: boolean;
 }> = [
-  { id: 'collection', label: 'Add to collection', icon: 'collections-bookmark' },
+  {
+    id: 'collection',
+    label: 'Add to collection',
+    icon: 'collections-bookmark',
+  },
   { id: 'share', label: 'Share EPUB', icon: 'share' },
   { id: 'export', label: 'Export notes', icon: 'notes' },
-  { id: 'remove', label: 'Remove book', icon: 'delete-outline', destructive: true },
+  {
+    id: 'remove',
+    label: 'Remove book',
+    icon: 'delete-outline',
+    destructive: true,
+  },
 ];
 
 export function BookActionModal({
@@ -43,21 +54,44 @@ export function BookActionModal({
   }
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
-      <Pressable accessibilityRole="button" onPress={onClose} style={styles.backdrop}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <Pressable
+        accessibilityRole="button"
+        onPress={onClose}
+        style={styles.backdrop}
+      >
         <Pressable
           accessibilityRole="none"
           onPress={event => event.stopPropagation()}
-          style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <Text
             numberOfLines={2}
-            style={[typography.titleMd, styles.title, { color: colors.onSurface }]}>
+            style={[
+              typography.titleMd,
+              styles.title,
+              { color: colors.onSurface },
+            ]}
+          >
             {book.title}
           </Text>
           {book.author ? (
             <Text
               numberOfLines={1}
-              style={[typography.caption, styles.author, { color: colors.onSurfaceVariant }]}>
+              style={[
+                typography.caption,
+                styles.author,
+                { color: colors.onSurfaceVariant },
+              ]}
+            >
               {book.author}
             </Text>
           ) : null}
@@ -75,9 +109,12 @@ export function BookActionModal({
                       ? colors.surfaceContainerHigh
                       : colors.surfaceContainerLow,
                   },
-                ]}>
+                ]}
+              >
                 <Icon
-                  color={action.destructive ? colors.error : colors.onSurfaceVariant}
+                  color={
+                    action.destructive ? colors.error : colors.onSurfaceVariant
+                  }
                   name={action.icon}
                   size={22}
                 />
@@ -85,10 +122,13 @@ export function BookActionModal({
                   style={[
                     typography.body,
                     {
-                      color: action.destructive ? colors.error : colors.onSurface,
+                      color: action.destructive
+                        ? colors.error
+                        : colors.onSurface,
                       flex: 1,
                     },
-                  ]}>
+                  ]}
+                >
                   {action.label}
                 </Text>
               </Pressable>
@@ -101,10 +141,17 @@ export function BookActionModal({
             style={({ pressed }) => [
               styles.cancelButton,
               {
-                backgroundColor: pressed ? colors.surfaceContainerHigh : colors.surfaceContainer,
+                backgroundColor: pressed
+                  ? colors.surfaceContainerHigh
+                  : colors.surfaceContainer,
               },
-            ]}>
-            <Text style={[typography.button, { color: colors.onSurfaceVariant }]}>Cancel</Text>
+            ]}
+          >
+            <Text
+              style={[typography.button, { color: colors.onSurfaceVariant }]}
+            >
+              Cancel
+            </Text>
           </Pressable>
         </Pressable>
       </Pressable>

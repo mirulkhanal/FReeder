@@ -1,10 +1,21 @@
 import React from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import type { ReaderChromePrefs } from '../../services/readerChromePrefs';
-import type { ReaderPreferences } from '../../services/readerPreferences';
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
+
+import { useTheme } from '../../theme';
+
 import { ReaderChromePrefsEditor } from './ReaderChromePrefsEditor';
 import { ReaderPreferencesEditor } from './ReaderPreferencesEditor';
-import { useTheme } from '../../theme';
+
+import type { ReaderChromePrefs } from '../../services/readerChromePrefs';
+import type { ReaderPreferences } from '../../services/readerPreferences';
 
 type ReaderSettingsModalProps = {
   visible: boolean;
@@ -30,36 +41,64 @@ export function ReaderSettingsModal({
   const { colors, typography } = useTheme();
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
             <Text style={[typography.headline, { color: colors.onSurface }]}>
               Reading settings
             </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Done</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Done
+              </Text>
             </Pressable>
           </View>
 
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.overrideBlock}>
               <View style={styles.overrideRow}>
-                <Text style={[typography.body, { color: colors.onSurface, flex: 1 }]}>
+                <Text
+                  style={[
+                    typography.body,
+                    { color: colors.onSurface, flex: 1 },
+                  ]}
+                >
                   Custom settings for this book
                 </Text>
-                <Switch value={bookOverrideEnabled} onValueChange={onBookOverrideChange} />
+                <Switch
+                  value={bookOverrideEnabled}
+                  onValueChange={onBookOverrideChange}
+                />
               </View>
-              <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[typography.caption, { color: colors.onSurfaceVariant }]}
+              >
                 {bookOverrideEnabled
                   ? 'Changes apply only to this book.'
                   : 'Using your global reading preferences.'}
               </Text>
             </View>
 
-            <ReaderPreferencesEditor preferences={preferences} onChange={onChange} />
+            <ReaderPreferencesEditor
+              preferences={preferences}
+              onChange={onChange}
+            />
             <View style={styles.divider} />
-            <ReaderChromePrefsEditor chromePrefs={chromePrefs} onChange={onChromePrefsChange} />
+            <ReaderChromePrefsEditor
+              chromePrefs={chromePrefs}
+              onChange={onChromePrefsChange}
+            />
           </ScrollView>
         </View>
       </View>

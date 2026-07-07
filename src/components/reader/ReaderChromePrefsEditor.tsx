@@ -1,11 +1,13 @@
 import React from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+
+import { useTheme } from '../../theme';
+
 import type {
   ReaderChromePrefs,
   TapZoneAction,
   TapZones,
 } from '../../services/readerChromePrefs';
-import { useTheme } from '../../theme';
 
 const TAP_ZONE_LABELS: Record<keyof TapZones, string> = {
   left: 'Left edge',
@@ -44,7 +46,12 @@ export function ReaderChromePrefsEditor({
 
   return (
     <View style={styles.root}>
-      <Text style={[typography.caption, { color: colors.onSurfaceVariant, marginBottom: 4 }]}>
+      <Text
+        style={[
+          typography.caption,
+          { color: colors.onSurfaceVariant, marginBottom: 4 },
+        ]}
+      >
         Tap zones, brightness, blue-light filter, and auto-scroll.
       </Text>
       <Section title="Tap zones">
@@ -103,11 +110,23 @@ export function ReaderChromePrefsEditor({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   const { colors, typography } = useTheme();
   return (
     <View style={styles.section}>
-      <Text style={[typography.caption, styles.sectionTitle, { color: colors.onSurfaceVariant }]}>
+      <Text
+        style={[
+          typography.caption,
+          styles.sectionTitle,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
         {title.toUpperCase()}
       </Text>
       {children}
@@ -133,15 +152,19 @@ function Chip({
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? colors.primary : colors.surfaceContainerLow,
+          backgroundColor: selected
+            ? colors.primary
+            : colors.surfaceContainerLow,
           borderColor: selected ? colors.primary : colors.outlineVariant,
         },
-      ]}>
+      ]}
+    >
       <Text
         style={[
           typography.caption,
           { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-        ]}>
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -166,19 +189,37 @@ function Stepper({
   onChange: (value: number) => void;
 }) {
   const { colors, typography } = useTheme();
-  const decrease = () => onChange(Math.max(min, Number((value - step).toFixed(2))));
-  const increase = () => onChange(Math.min(max, Number((value + step).toFixed(2))));
+  const decrease = () =>
+    onChange(Math.max(min, Number((value - step).toFixed(2))));
+  const increase = () =>
+    onChange(Math.min(max, Number((value + step).toFixed(2))));
 
   return (
     <View style={styles.stepper}>
-      <Text style={[typography.body, { color: colors.onSurface, flex: 1 }]}>{label}</Text>
-      <Pressable accessibilityRole="button" onPress={decrease} style={styles.stepperButton}>
+      <Text style={[typography.body, { color: colors.onSurface, flex: 1 }]}>
+        {label}
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={decrease}
+        style={styles.stepperButton}
+      >
         <Text style={[typography.headline, { color: colors.primary }]}>−</Text>
       </Pressable>
-      <Text style={[typography.body, styles.stepperValue, { color: colors.onSurface }]}>
+      <Text
+        style={[
+          typography.body,
+          styles.stepperValue,
+          { color: colors.onSurface },
+        ]}
+      >
         {format(value)}
       </Text>
-      <Pressable accessibilityRole="button" onPress={increase} style={styles.stepperButton}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={increase}
+        style={styles.stepperButton}
+      >
         <Text style={[typography.headline, { color: colors.primary }]}>+</Text>
       </Pressable>
     </View>
@@ -200,7 +241,9 @@ function ToggleRow({
   return (
     <View style={styles.toggleBlock}>
       <View style={styles.toggleRow}>
-        <Text style={[typography.body, { color: colors.onSurface, flex: 1 }]}>{label}</Text>
+        <Text style={[typography.body, { color: colors.onSurface, flex: 1 }]}>
+          {label}
+        </Text>
         <Switch value={value} onValueChange={onValueChange} />
       </View>
       {description ? (

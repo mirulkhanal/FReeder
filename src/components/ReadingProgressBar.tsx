@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+
 import { useTheme } from '../theme';
 
 type ReadingProgressBarProps = {
@@ -23,10 +24,17 @@ export function ReadingProgressBar({
     <View style={isCompact ? styles.compactRoot : styles.defaultRoot}>
       {!isCompact && showLabel ? (
         <View style={styles.progressHeader}>
-          <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+          <Text
+            style={[typography.caption, { color: colors.onSurfaceVariant }]}
+          >
             Progress
           </Text>
-          <Text style={[typography.caption, { color: colors.primary, fontWeight: '700' }]}>
+          <Text
+            style={[
+              typography.caption,
+              { color: colors.primary, fontWeight: '700' },
+            ]}
+          >
             {percent}%
           </Text>
         </View>
@@ -39,7 +47,8 @@ export function ReadingProgressBar({
               ? 'rgba(255, 255, 255, 0.25)'
               : colors.surfaceContainerHighest,
           },
-        ]}>
+        ]}
+      >
         <View
           style={[
             isCompact ? styles.compactFill : styles.defaultFill,

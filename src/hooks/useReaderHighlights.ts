@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking, Platform, Share } from 'react-native';
+
+import { loadHighlights, saveHighlights } from '../services/bookAnnotations';
+
+import type { HighlightStyleType } from '../components/reader/ReaderHighlightStyleModal';
 import type {
   Decoration,
   DecorationActivatedEvent,
@@ -8,10 +12,13 @@ import type {
   SelectionAction,
   SelectionActionEvent,
 } from 'react-native-readium';
-import type { HighlightStyleType } from '../components/reader/ReaderHighlightStyleModal';
-import { loadHighlights, saveHighlights } from '../services/bookAnnotations';
 
-export const HIGHLIGHT_COLORS = ['#FFF59D', '#A5D6A7', '#90CAF9', '#F48FB1'] as const;
+export const HIGHLIGHT_COLORS = [
+  '#FFF59D',
+  '#A5D6A7',
+  '#90CAF9',
+  '#F48FB1',
+] as const;
 
 export const SELECTION_ACTIONS: SelectionAction[] = [
   { id: 'copy', label: 'Copy' },
@@ -89,9 +96,12 @@ export function useReaderHighlights(bookId: string) {
   ]);
   const [styleModalVisible, setStyleModalVisible] = useState(false);
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
-  const [pendingHighlight, setPendingHighlight] = useState<PendingHighlight | null>(null);
+  const [pendingHighlight, setPendingHighlight] =
+    useState<PendingHighlight | null>(null);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
-  const [selectedHighlight, setSelectedHighlight] = useState<Decoration | null>(null);
+  const [selectedHighlight, setSelectedHighlight] = useState<Decoration | null>(
+    null,
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -107,7 +117,8 @@ export function useReaderHighlights(bookId: string) {
   }, [bookId]);
 
   const highlights = useMemo(
-    () => decorations.find(group => group.name === 'highlights')?.decorations ?? [],
+    () =>
+      decorations.find(group => group.name === 'highlights')?.decorations ?? [],
     [decorations],
   );
 
@@ -145,11 +156,14 @@ export function useReaderHighlights(bookId: string) {
     }
   }, []);
 
-  const handleSelectHighlightStyle = useCallback((styleType: HighlightStyleType) => {
-    setPendingHighlight(prev => (prev ? { ...prev, styleType } : prev));
-    setStyleModalVisible(false);
-    setColorPickerVisible(true);
-  }, []);
+  const handleSelectHighlightStyle = useCallback(
+    (styleType: HighlightStyleType) => {
+      setPendingHighlight(prev => (prev ? { ...prev, styleType } : prev));
+      setStyleModalVisible(false);
+      setColorPickerVisible(true);
+    },
+    [],
+  );
 
   const handleCreateHighlight = useCallback(
     (color: string, note: string) => {
@@ -170,7 +184,10 @@ export function useReaderHighlights(bookId: string) {
       };
 
       setDecorations(prev => {
-        const next = updateHighlightGroup(prev, current => [...current, newHighlight]);
+        const next = updateHighlightGroup(prev, current => [
+          ...current,
+          newHighlight,
+        ]);
         const nextHighlights =
           next.find(group => group.name === 'highlights')?.decorations ?? [];
         void saveHighlights(bookId, nextHighlights);
@@ -194,10 +211,13 @@ export function useReaderHighlights(bookId: string) {
     setPendingHighlight(null);
   }, []);
 
-  const handleDecorationActivated = useCallback((event: DecorationActivatedEvent) => {
-    setSelectedHighlight(event.decoration);
-    setEditDialogVisible(true);
-  }, []);
+  const handleDecorationActivated = useCallback(
+    (event: DecorationActivatedEvent) => {
+      setSelectedHighlight(event.decoration);
+      setEditDialogVisible(true);
+    },
+    [],
+  );
 
   const handleEditHighlight = useCallback((highlight: Decoration) => {
     setSelectedHighlight(highlight);
@@ -205,7 +225,12 @@ export function useReaderHighlights(bookId: string) {
   }, []);
 
   const handleUpdateHighlight = useCallback(
-    (id: string, color: string, note: string, styleType: HighlightStyleType) => {
+    (
+      id: string,
+      color: string,
+      note: string,
+      styleType: HighlightStyleType,
+    ) => {
       const next = updateHighlightGroup(decorations, current =>
         current.map(item =>
           item.id === id

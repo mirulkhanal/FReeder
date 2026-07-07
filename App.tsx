@@ -2,9 +2,10 @@ import React from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { LibraryProvider } from './src/context/LibraryContext';
-import { IncomingBooksListener } from './src/components/IncomingBooksListener';
+
 import { ThemedDialogHost } from './src/components/common/ThemedDialogHost';
+import { IncomingBooksListener } from './src/components/IncomingBooksListener';
+import { LibraryProvider } from './src/context/LibraryContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { ThemeProvider, useTheme } from './src/theme';
 

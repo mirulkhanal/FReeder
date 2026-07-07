@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { generateBookId } from '../types/book';
 
 const STORAGE_KEY = '@freeder/collections';
@@ -22,11 +23,15 @@ export async function loadCollections(): Promise<BookCollection[]> {
   }
 }
 
-export async function saveCollections(collections: BookCollection[]): Promise<void> {
+export async function saveCollections(
+  collections: BookCollection[],
+): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(collections));
 }
 
-export async function createCollection(name: string): Promise<BookCollection[]> {
+export async function createCollection(
+  name: string,
+): Promise<BookCollection[]> {
   const collections = await loadCollections();
   const trimmed = name.trim();
   if (!trimmed) {
@@ -43,10 +48,15 @@ export async function createCollection(name: string): Promise<BookCollection[]> 
   return updated;
 }
 
-export async function renameCollection(id: string, name: string): Promise<BookCollection[]> {
+export async function renameCollection(
+  id: string,
+  name: string,
+): Promise<BookCollection[]> {
   const collections = await loadCollections();
   const updated = collections.map(collection =>
-    collection.id === id ? { ...collection, name: name.trim() || collection.name } : collection,
+    collection.id === id
+      ? { ...collection, name: name.trim() || collection.name }
+      : collection,
   );
   await saveCollections(updated);
   return updated;
@@ -83,7 +93,9 @@ export async function setBookCollections(
   return updated;
 }
 
-export async function removeBookFromAllCollections(bookId: string): Promise<void> {
+export async function removeBookFromAllCollections(
+  bookId: string,
+): Promise<void> {
   const collections = await loadCollections();
   const updated = collections.map(collection => ({
     ...collection,

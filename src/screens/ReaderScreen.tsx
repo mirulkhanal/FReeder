@@ -1,41 +1,54 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { ReadiumView } from 'react-native-readium';
-import type {
-  Link,
-  Locator,
-  PublicationMetadata,
-  PublicationReadyEvent,
-  ReadiumFile,
-  ReadiumViewRef,
-} from 'react-native-readium';
-import { ReaderProgressModal } from '../components/reader/ReaderProgressModal';
-import { ReaderHeader } from '../components/reader/ReaderHeader';
-import { ReaderSettingsModal } from '../components/reader/ReaderSettingsModal';
-import { ReaderTocModal } from '../components/reader/ReaderTocModal';
-import type { TocLink } from '../utils/readiumNavigation';
-import { ReaderToolbar } from '../components/reader/ReaderToolbar';
-import { ReaderSearchModal } from '../components/reader/ReaderSearchModal';
+
 import { ReaderBookmarksModal } from '../components/reader/ReaderBookmarksModal';
-import { ReaderHighlightsModal } from '../components/reader/ReaderHighlightsModal';
-import { ReaderMetadataModal } from '../components/reader/ReaderMetadataModal';
 import { ReaderComfortOverlay } from '../components/reader/ReaderComfortOverlay';
-import { ReaderMenuButton } from '../components/reader/ReaderMenuButton';
-import { ReaderTapGestureWrapper } from '../components/reader/ReaderTapGestureWrapper';
+import { ReaderHeader } from '../components/reader/ReaderHeader';
 import {
   ReaderHighlightColorModal,
   ReaderHighlightEditModal,
 } from '../components/reader/ReaderHighlightDialogs';
+import { ReaderHighlightsModal } from '../components/reader/ReaderHighlightsModal';
 import { ReaderHighlightStyleModal } from '../components/reader/ReaderHighlightStyleModal';
-import { classifyBookOpenError, verifyBookAccessible } from '../services/bookDeletion';
-import { resolveReadableBookUri } from '../services/bookFile';
+import { ReaderMenuButton } from '../components/reader/ReaderMenuButton';
+import { ReaderMetadataModal } from '../components/reader/ReaderMetadataModal';
+import { ReaderProgressModal } from '../components/reader/ReaderProgressModal';
+import { ReaderSearchModal } from '../components/reader/ReaderSearchModal';
+import { ReaderSettingsModal } from '../components/reader/ReaderSettingsModal';
+import { ReaderTapGestureWrapper } from '../components/reader/ReaderTapGestureWrapper';
+import { ReaderTocModal } from '../components/reader/ReaderTocModal';
+import { ReaderToolbar } from '../components/reader/ReaderToolbar';
+import { useAutoScroll } from '../hooks/useAutoScroll';
+import { useReaderChrome } from '../hooks/useReaderChrome';
+import {
+  SELECTION_ACTIONS,
+  useReaderHighlights,
+} from '../hooks/useReaderHighlights';
+import { useReaderSearch } from '../hooks/useReaderSearch';
 import {
   addBookmark,
   loadBookmarks,
   removeBookmark,
   type BookBookmark,
 } from '../services/bookBookmarks';
+import {
+  classifyBookOpenError,
+  verifyBookAccessible,
+} from '../services/bookDeletion';
+import { resolveReadableBookUri } from '../services/bookFile';
 import {
   clearBookReaderPrefs,
   loadBookReaderPrefs,
@@ -45,6 +58,7 @@ import {
   DEFAULT_READER_CHROME_PREFS,
   loadReaderChromePrefs,
   saveReaderChromePrefs,
+  type TapZoneAction,
   type ReaderChromePrefs,
 } from '../services/readerChromePrefs';
 import {
@@ -60,8 +74,11 @@ import {
   saveReadingState,
   updateReadingFlags,
 } from '../services/readingProgress';
-import { recordBookFinished, recordReadingSession } from '../services/readingStatistics';
-import type { RootStackParamList } from '../navigation/types';
+import {
+  recordBookFinished,
+  recordReadingSession,
+} from '../services/readingStatistics';
+import { useTheme } from '../theme';
 import { getBookFileName } from '../types/book';
 import {
   flattenTocLinks,
@@ -69,11 +86,18 @@ import {
   locatorAtProgress,
   locatorForLink,
 } from '../utils/readiumNavigation';
-import { useAutoScroll } from '../hooks/useAutoScroll';
-import { useReaderChrome } from '../hooks/useReaderChrome';
-import { SELECTION_ACTIONS, useReaderHighlights } from '../hooks/useReaderHighlights';
-import { useReaderSearch } from '../hooks/useReaderSearch';
-import { useTheme } from '../theme';
+
+import type { RootStackParamList } from '../navigation/types';
+import type { TocLink } from '../utils/readiumNavigation';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type {
+  Link,
+  Locator,
+  PublicationMetadata,
+  PublicationReadyEvent,
+  ReadiumFile,
+  ReadiumViewRef,
+} from 'react-native-readium';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 
@@ -87,7 +111,9 @@ export function ReaderScreen({ navigation, route }: Props) {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [initialLocator, setInitialLocator] = useState<Locator | undefined>();
   const [readerReady, setReaderReady] = useState(false);
-  const [error, setError] = useState<{ message: string; code: string } | null>(null);
+  const [error, setError] = useState<{ message: string; code: string } | null>(
+    null,
+  );
   const [author, setAuthor] = useState(book.author);
   const [favorite, setFavorite] = useState(false);
   const [preferences, setPreferences] = useState<ReaderPreferences>(
@@ -100,9 +126,8 @@ export function ReaderScreen({ navigation, route }: Props) {
   const [tocTree, setTocTree] = useState<TocLink[]>([]);
   const [tocLinks, setTocLinks] = useState<Link[]>([]);
   const [positions, setPositions] = useState<Locator[]>([]);
-  const [publicationMetadata, setPublicationMetadata] = useState<PublicationMetadata | null>(
-    null,
-  );
+  const [publicationMetadata, setPublicationMetadata] =
+    useState<PublicationMetadata | null>(null);
   const [bookmarks, setBookmarks] = useState<BookBookmark[]>([]);
   const [currentProgress, setCurrentProgress] = useState(0);
   const [tocVisible, setTocVisible] = useState(false);
@@ -163,7 +188,7 @@ export function ReaderScreen({ navigation, route }: Props) {
     useReaderChrome(modalsOpen, readerReady);
 
   const runTapAction = useCallback(
-    (action: typeof chromePrefs.tapZones.left) => {
+    (action: TapZoneAction) => {
       switch (action) {
         case 'prev':
           readerRef.current?.goBackward();
@@ -193,21 +218,27 @@ export function ReaderScreen({ navigation, route }: Props) {
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
-      const [state, globalPrefs, bookPrefs, storedChromePrefs, storedBookmarks] =
-        await Promise.all([
-          getReadingState(book.id),
-          loadReaderPreferences(),
-          loadBookReaderPrefs(book.id),
-          loadReaderChromePrefs(),
-          loadBookmarks(book.id),
-        ]);
+    void (async () => {
+      const [
+        state,
+        globalPrefs,
+        bookPrefs,
+        storedChromePrefs,
+        storedBookmarks,
+      ] = await Promise.all([
+        getReadingState(book.id),
+        loadReaderPreferences(),
+        loadBookReaderPrefs(book.id),
+        loadReaderChromePrefs(),
+        loadBookmarks(book.id),
+      ]);
 
       if (!mounted) {
         return;
       }
 
-      const hasBookOverride = bookPrefs !== null && Object.keys(bookPrefs).length > 0;
+      const hasBookOverride =
+        bookPrefs !== null && Object.keys(bookPrefs).length > 0;
       setBookOverrideEnabled(hasBookOverride);
       setPreferences(
         hasBookOverride ? { ...globalPrefs, ...bookPrefs } : globalPrefs,
@@ -251,7 +282,7 @@ export function ReaderScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     return () => {
-      readerRef.current?.destroy();
+      readerRef.current = null;
     };
   }, []);
 
@@ -455,8 +486,7 @@ export function ReaderScreen({ navigation, route }: Props) {
 
     const progress = currentProgress;
     const label =
-      chapterTitle?.trim() ||
-      `Bookmark at ${Math.round(progress * 100)}%`;
+      chapterTitle?.trim() || `Bookmark at ${Math.round(progress * 100)}%`;
 
     const bookmark: BookBookmark = {
       id: `bookmark-${Date.now()}`,
@@ -493,20 +523,40 @@ export function ReaderScreen({ navigation, route }: Props) {
   if (error) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[typography.headline, { color: colors.onSurface, textAlign: 'center' }]}>
+        <Text
+          style={[
+            typography.headline,
+            { color: colors.onSurface, textAlign: 'center' },
+          ]}
+        >
           Unable to open book
         </Text>
-        <Text style={[typography.body, styles.errorBody, { color: colors.onSurfaceVariant }]}>
+        <Text
+          style={[
+            typography.body,
+            styles.errorBody,
+            { color: colors.onSurfaceVariant },
+          ]}
+        >
           {error.message}
         </Text>
-        <Text style={[typography.caption, styles.errorHint, { color: colors.onSurfaceVariant }]}>
+        <Text
+          style={[
+            typography.caption,
+            styles.errorHint,
+            { color: colors.onSurfaceVariant },
+          ]}
+        >
           FReeder supports DRM-free EPUB 2 and EPUB 3 files only.
         </Text>
         <Pressable
           accessibilityRole="button"
           onPress={() => navigation.goBack()}
-          style={[styles.errorButton, { backgroundColor: colors.primary }]}>
-          <Text style={[typography.button, { color: colors.onPrimary }]}>Back to library</Text>
+          style={[styles.errorButton, { backgroundColor: colors.primary }]}
+        >
+          <Text style={[typography.button, { color: colors.onPrimary }]}>
+            Back to library
+          </Text>
         </Pressable>
       </View>
     );
@@ -516,7 +566,13 @@ export function ReaderScreen({ navigation, route }: Props) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[typography.body, styles.loadingText, { color: colors.onSurfaceVariant }]}>
+        <Text
+          style={[
+            typography.body,
+            styles.loadingText,
+            { color: colors.onSurfaceVariant },
+          ]}
+        >
           Opening EPUB…
         </Text>
       </View>
@@ -524,11 +580,17 @@ export function ReaderScreen({ navigation, route }: Props) {
   }
 
   return (
-    <View style={[styles.reader, { backgroundColor: readiumPreferences.backgroundColor }]}>
+    <View
+      style={[
+        styles.reader,
+        { backgroundColor: readiumPreferences.backgroundColor },
+      ]}
+    >
       <ReaderTapGestureWrapper
         enabled={tapGesturesEnabled}
         tapZones={chromePrefs.tapZones}
-        onZoneAction={runTapAction}>
+        onZoneAction={runTapAction}
+      >
         <ReadiumView
           key={readiumViewKey}
           ref={readerRef}

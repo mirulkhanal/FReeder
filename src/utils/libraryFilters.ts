@@ -1,8 +1,9 @@
+import { isBookFinished, isBookInProgress } from '../services/readingProgress';
+
 import type { LibraryFilter } from '../components/FilterChips';
 import type { LibrarySort } from '../components/SortChips';
 import type { BookCollection } from '../services/collectionsStorage';
 import type { ReadingState } from '../services/readingProgress';
-import { isBookFinished, isBookInProgress } from '../services/readingProgress';
 import type { Book } from '../types/book';
 
 export function getNowReadingBook(
@@ -17,7 +18,7 @@ export function getNowReadingBook(
   const ranked = available
     .map(book => ({ book, state: states[book.id] }))
     .filter(entry => entry.state?.lastOpenedAt)
-    .sort((a, b) => (b.state!.lastOpenedAt - a.state!.lastOpenedAt));
+    .sort((a, b) => b.state!.lastOpenedAt - a.state!.lastOpenedAt);
 
   return ranked[0]?.book ?? available[0];
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../theme';
 
 type SettingsLibraryCardProps = {
@@ -35,7 +36,8 @@ export function SettingsLibraryCard({
             backgroundColor: colors.primary,
             opacity: !hasLibraryFolder ? 0.5 : pressed ? 0.9 : 1,
           },
-        ]}>
+        ]}
+      >
         <Icon name="refresh" size={20} color={colors.onPrimary} />
         <Text style={[typography.button, { color: colors.onPrimary }]}>
           Refresh library folder
@@ -48,10 +50,13 @@ export function SettingsLibraryCard({
         style={({ pressed }) => [
           styles.secondaryButton,
           {
-            backgroundColor: pressed ? colors.surfaceContainerHigh : colors.surfaceContainerLow,
+            backgroundColor: pressed
+              ? colors.surfaceContainerHigh
+              : colors.surfaceContainerLow,
             borderColor: colors.outlineVariant,
           },
-        ]}>
+        ]}
+      >
         <Icon name="image" size={20} color={colors.onSurfaceVariant} />
         <Text style={[typography.button, { color: colors.onSurfaceVariant }]}>
           Re-extract covers
@@ -64,10 +69,13 @@ export function SettingsLibraryCard({
         style={({ pressed }) => [
           styles.secondaryButton,
           {
-            backgroundColor: pressed ? colors.surfaceContainerHigh : colors.surfaceContainerLow,
+            backgroundColor: pressed
+              ? colors.surfaceContainerHigh
+              : colors.surfaceContainerLow,
             borderColor: colors.outlineVariant,
           },
-        ]}>
+        ]}
+      >
         <Icon name="content-copy" size={20} color={colors.onSurfaceVariant} />
         <Text style={[typography.button, { color: colors.onSurfaceVariant }]}>
           Find duplicate books
@@ -79,15 +87,23 @@ export function SettingsLibraryCard({
         onPress={onClearLibrary}
         style={({ pressed }) => [
           styles.button,
-          { backgroundColor: pressed ? '#f5c4be' : ERROR_CONTAINER, opacity: pressed ? 0.95 : 1 },
-        ]}>
+          {
+            backgroundColor: pressed ? '#f5c4be' : ERROR_CONTAINER,
+            opacity: pressed ? 0.95 : 1,
+          },
+        ]}
+      >
         <Icon name="delete-forever" size={20} color={ON_ERROR_CONTAINER} />
-        <Text style={[typography.button, styles.buttonText]}>Clear library</Text>
+        <Text style={[typography.button, styles.buttonText]}>
+          Clear library
+        </Text>
       </Pressable>
 
       <Text style={[styles.footnote, { color: ON_ERROR_CONTAINER }]}>
         This will remove every book from FReeder and reset progress.{' '}
-        <Text style={styles.footnoteBold}>Your physical EPUB files will not be touched.</Text>
+        <Text style={styles.footnoteBold}>
+          Your physical EPUB files will not be touched.
+        </Text>
       </Text>
     </View>
   );

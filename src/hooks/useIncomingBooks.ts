@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Linking, Platform } from 'react-native';
+import { Linking } from 'react-native';
+
 import { useLibrary } from '../context/LibraryContext';
 import { bookFromPickedFile } from '../services/libraryMerge';
 import { isSupportedBookFileName } from '../services/libraryScanner';
@@ -27,7 +28,10 @@ export function useIncomingBooks() {
         return;
       }
       const fileName = fileNameFromUri(url);
-      if (!isSupportedBookFileName(fileName) && !lower.startsWith('content://')) {
+      if (
+        !isSupportedBookFileName(fileName) &&
+        !lower.startsWith('content://')
+      ) {
         return;
       }
       void importIncomingBook(bookFromPickedFile(url, fileName));

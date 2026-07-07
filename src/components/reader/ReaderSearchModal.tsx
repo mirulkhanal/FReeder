@@ -10,9 +10,11 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import type { Locator } from 'react-native-readium';
-import type { ReaderSearchResult } from '../../hooks/useReaderSearch';
+
 import { useTheme } from '../../theme';
+
+import type { ReaderSearchResult } from '../../hooks/useReaderSearch';
+import type { Locator } from 'react-native-readium';
 
 type ReaderSearchModalProps = {
   visible: boolean;
@@ -65,7 +67,7 @@ export function ReaderSearchModal({
   }, [onClose]);
 
   const renderResult = useCallback(
-    ({ item, index }: { item: ReaderSearchResult; index: number }) => {
+    ({ item }: { item: ReaderSearchResult; index: number }) => {
       const highlight = item.highlight ?? item.locator.text?.highlight;
       const before = trimContext(item.before);
       const after = trimContext(item.after);
@@ -75,8 +77,8 @@ export function ReaderSearchModal({
         position != null
           ? `p. ${position}`
           : totalProgression != null
-            ? `${Math.round(totalProgression * 100)}%`
-            : null;
+          ? `${Math.round(totalProgression * 100)}%`
+          : null;
 
       return (
         <Pressable
@@ -88,13 +90,22 @@ export function ReaderSearchModal({
           style={({ pressed }) => [
             styles.resultItem,
             pressed && { backgroundColor: colors.surfaceContainerHigh },
-          ]}>
-          <Text style={[typography.body, styles.resultText, { color: colors.onSurface }]}>
+          ]}
+        >
+          <Text
+            style={[
+              typography.body,
+              styles.resultText,
+              { color: colors.onSurface },
+            ]}
+          >
             {before ? (
               <Text style={{ color: colors.onSurfaceVariant }}>{before}</Text>
             ) : null}
             {highlight ? (
-              <Text style={[styles.resultHighlight, { color: colors.onSurface }]}>
+              <Text
+                style={[styles.resultHighlight, { color: colors.onSurface }]}
+              >
                 {highlight}
               </Text>
             ) : (
@@ -105,7 +116,9 @@ export function ReaderSearchModal({
             ) : null}
           </Text>
           {positionLabel ? (
-            <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+            <Text
+              style={[typography.caption, { color: colors.onSurfaceVariant }]}
+            >
               {positionLabel}
             </Text>
           ) : null}
@@ -128,7 +141,12 @@ export function ReaderSearchModal({
     if (!isSupported) {
       return (
         <View style={styles.empty}>
-          <Text style={[typography.body, { color: colors.onSurfaceVariant, textAlign: 'center' }]}>
+          <Text
+            style={[
+              typography.body,
+              { color: colors.onSurfaceVariant, textAlign: 'center' },
+            ]}
+          >
             Search is not available for this book.
           </Text>
         </View>
@@ -138,14 +156,21 @@ export function ReaderSearchModal({
       return (
         <View style={styles.empty}>
           <ActivityIndicator color={colors.primary} />
-          <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>Searching…</Text>
+          <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>
+            Searching…
+          </Text>
         </View>
       );
     }
     if (hasSearched && results.length === 0) {
       return (
         <View style={styles.empty}>
-          <Text style={[typography.body, { color: colors.onSurfaceVariant, textAlign: 'center' }]}>
+          <Text
+            style={[
+              typography.body,
+              { color: colors.onSurfaceVariant, textAlign: 'center' },
+            ]}
+          >
             No matches for "{query.trim()}"
           </Text>
         </View>
@@ -153,7 +178,12 @@ export function ReaderSearchModal({
     }
     return (
       <View style={styles.empty}>
-        <Text style={[typography.body, { color: colors.onSurfaceVariant, textAlign: 'center' }]}>
+        <Text
+          style={[
+            typography.body,
+            { color: colors.onSurfaceVariant, textAlign: 'center' },
+          ]}
+        >
           Search inside this book
         </Text>
       </View>
@@ -161,21 +191,39 @@ export function ReaderSearchModal({
   };
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={handleClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={handleClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
-            <Text style={[typography.headline, { color: colors.onSurface }]}>Search</Text>
+            <Text style={[typography.headline, { color: colors.onSurface }]}>
+              Search
+            </Text>
             <Pressable accessibilityRole="button" onPress={handleClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Close</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Close
+              </Text>
             </Pressable>
           </View>
 
           <View
             style={[
               styles.inputRow,
-              { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant },
-            ]}>
+              {
+                backgroundColor: colors.surfaceContainerLow,
+                borderColor: colors.outlineVariant,
+              },
+            ]}
+          >
             <Icon name="search" size={20} color={colors.onSurfaceVariant} />
             <TextInput
               accessibilityLabel="Search query"
@@ -186,11 +234,19 @@ export function ReaderSearchModal({
               placeholder="Word or phrase"
               placeholderTextColor={colors.onSurfaceVariant}
               returnKeyType="search"
-              style={[typography.body, styles.input, { color: colors.onSurface }]}
+              style={[
+                typography.body,
+                styles.input,
+                { color: colors.onSurface },
+              ]}
               value={query}
             />
             {query.length > 0 ? (
-              <Pressable accessibilityRole="button" hitSlop={8} onPress={handleClear}>
+              <Pressable
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={handleClear}
+              >
                 <Icon name="close" size={20} color={colors.onSurfaceVariant} />
               </Pressable>
             ) : null}
@@ -198,7 +254,8 @@ export function ReaderSearchModal({
               accessibilityRole="button"
               hitSlop={8}
               onPress={handleSubmit}
-              style={[styles.searchButton, { backgroundColor: colors.primary }]}>
+              style={[styles.searchButton, { backgroundColor: colors.primary }]}
+            >
               <Icon name="arrow-forward" size={18} color={colors.onPrimary} />
             </Pressable>
           </View>
@@ -207,12 +264,17 @@ export function ReaderSearchModal({
             contentContainerStyle={styles.list}
             data={results}
             keyExtractor={(item, index) =>
-              `${item.locator.href}-${item.locator.locations?.progression ?? index}`
+              `${item.locator.href}-${
+                item.locator.locations?.progression ?? index
+              }`
             }
             ListEmptyComponent={listEmpty}
             ListFooterComponent={
               isLoadingMore ? (
-                <ActivityIndicator color={colors.primary} style={styles.footerSpinner} />
+                <ActivityIndicator
+                  color={colors.primary}
+                  style={styles.footerSpinner}
+                />
               ) : null
             }
             onEndReached={() => {
@@ -233,7 +295,10 @@ function trimContext(value?: string): string | undefined {
   if (!value) {
     return undefined;
   }
-  const normalized = value.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  const normalized = value
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   if (normalized.length <= 50) {
     return normalized;
   }
