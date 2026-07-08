@@ -2,6 +2,7 @@ export type OpdsCatalog = {
   id: string;
   title: string;
   url: string;
+  opdsVersion?: 'auto' | '1' | '2';
   username?: string;
   password?: string;
 };

@@ -40,7 +40,11 @@ export async function loadOpdsCatalogs(): Promise<OpdsCatalog[]> {
           catalog.id,
           catalog.password,
         );
-        return { ...catalog, password };
+        return {
+          ...catalog,
+          opdsVersion: catalog.opdsVersion ?? 'auto',
+          password,
+        };
       }),
     );
   } catch {
@@ -72,6 +76,7 @@ export async function addOpdsCatalog(
     id: input.id ?? generateBookId(),
     title: input.title.trim() || catalogTitleFromUrl(input.url),
     url: input.url.trim(),
+    opdsVersion: input.opdsVersion ?? 'auto',
     username: input.username?.trim() || undefined,
     password: input.password || undefined,
   };
@@ -95,6 +100,7 @@ export async function updateOpdsCatalog(
   input: {
     url: string;
     title: string;
+    opdsVersion: 'auto' | '1' | '2';
     username?: string;
     password?: string;
     keepExistingPassword?: boolean;
@@ -121,6 +127,7 @@ export async function updateOpdsCatalog(
     ...existing,
     url,
     title: input.title.trim() || catalogTitleFromUrl(url),
+    opdsVersion: input.opdsVersion,
     username: input.username?.trim() || undefined,
     password: input.keepExistingPassword
       ? existing.password

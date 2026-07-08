@@ -1,3 +1,10 @@
+import { yieldToUi } from '../utils/yieldToUi';
+
+import {
+  finishCoverEnrichment,
+  startCoverEnrichment,
+  updateCoverEnrichment,
+} from './coverEnrichmentQueue';
 import { hashBookFile } from './duplicateDetection';
 import {
   extractEpubMetadata,
@@ -10,6 +17,8 @@ import type { Book } from '../types/book';
 const ENRICH_CONCURRENCY = 1;
 
 export async function enrichBook(book: Book): Promise<Book> {
+  await yieldToUi();
+
   const hasValidCover = book.coverUri
     ? await isCoverUriValid(book.coverUri)
     : false;
@@ -57,28 +66,54 @@ export async function enrichBooksInBackground(
   books: Book[],
   onBookEnriched: (book: Book) => void,
 ): Promise<void> {
-  let index = 0;
+  if (books.length === 0) {
+    return;
+  }
 
-  const worker = async () => {
-    while (index < books.length) {
-      const current = index;
-      index += 1;
-      const book = books[current];
-      const enriched = await enrichBook(book);
+  startCoverEnrichment(books.length);
 
-      if (
-        enriched.coverUri !== book.coverUri ||
-        enriched.title !== book.title ||
-        enriched.author !== book.author ||
-        enriched.series !== book.series ||
-        enriched.contentHash !== book.contentHash
-      ) {
-        onBookEnriched(enriched);
+  try {
+    let index = 0;
+
+    const worker = async () => {
+      while (index < books.length) {
+        const current = index;
+        index += 1;
+        const book = books[current];
+
+        updateCoverEnrichment({
+          completed: current,
+          currentTitle: book.title,
+        });
+
+        await yieldToUi();
+        const enriched = await enrichBook(book);
+
+        if (
+          enriched.coverUri !== book.coverUri ||
+          enriched.title !== book.title ||
+          enriched.author !== book.author ||
+          enriched.series !== book.series ||
+          enriched.contentHash !== book.contentHash
+        ) {
+          onBookEnriched(enriched);
+        }
+
+        updateCoverEnrichment({
+          completed: current + 1,
+          currentTitle: book.title,
+        });
+        await yieldToUi();
       }
-    }
-  };
+    };
 
-  await Promise.all(
-    Array.from({ length: Math.min(ENRICH_CONCURRENCY, books.length) }, worker),
-  );
+    await Promise.all(
+      Array.from(
+        { length: Math.min(ENRICH_CONCURRENCY, books.length) },
+        worker,
+      ),
+    );
+  } finally {
+    finishCoverEnrichment();
+  }
 }

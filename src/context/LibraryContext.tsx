@@ -21,7 +21,6 @@ import {
   removeBookFromLibrary,
 } from '../services/bookDeletion';
 import { enrichBooksInBackground } from '../services/bookEnrichment';
-import { getCachedCoverUri, isCoverUriValid } from '../services/epubCover';
 import {
   bookFromPickedFile,
   mergeScannedWithLibrary,
@@ -69,44 +68,94 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSelectingFolder, setIsSelectingFolder] = useState(false);
   const enrichingRef = useRef(false);
+  const enrichmentPendingRef = useRef<Book[]>([]);
+  const enrichmentFlushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const enrichmentUpdatesRef = useRef(new Map<string, Book>());
   const booksRef = useRef(books);
   booksRef.current = books;
 
-  const enrichBooks = useCallback((bookList: Book[]) => {
-    if (bookList.length === 0 || enrichingRef.current) {
+  const flushEnrichmentUpdates = useCallback(() => {
+    const updates = enrichmentUpdatesRef.current;
+    if (updates.size === 0) {
+      return;
+    }
+
+    const patchById = new Map(updates);
+    updates.clear();
+
+    setBooks(prev => {
+      const next = prev.map(book =>
+        patchById.has(book.id) ? { ...book, ...patchById.get(book.id)! } : book,
+      );
+      void saveCachedBooks(next);
+      return next;
+    });
+  }, []);
+
+  const scheduleEnrichmentFlush = useCallback(() => {
+    if (enrichmentFlushTimerRef.current) {
+      return;
+    }
+
+    enrichmentFlushTimerRef.current = setTimeout(() => {
+      enrichmentFlushTimerRef.current = null;
+      flushEnrichmentUpdates();
+    }, 120);
+  }, [flushEnrichmentUpdates]);
+
+  const processEnrichmentQueue = useCallback(async () => {
+    if (enrichingRef.current) {
       return;
     }
 
     enrichingRef.current = true;
-    void enrichBooksInBackground(bookList, enriched => {
-      setBooks(prev => {
-        const next = prev.map(book =>
-          book.id === enriched.id ? { ...book, ...enriched } : book,
-        );
-        void saveCachedBooks(next);
-        return next;
-      });
-    }).finally(() => {
+
+    try {
+      while (enrichmentPendingRef.current.length > 0) {
+        const seen = new Set<string>();
+        const batch = enrichmentPendingRef.current.filter(book => {
+          if (seen.has(book.id)) {
+            return false;
+          }
+          seen.add(book.id);
+          return true;
+        });
+        enrichmentPendingRef.current = [];
+
+        await enrichBooksInBackground(batch, enriched => {
+          enrichmentUpdatesRef.current.set(enriched.id, enriched);
+          scheduleEnrichmentFlush();
+        });
+      }
+    } finally {
+      flushEnrichmentUpdates();
       enrichingRef.current = false;
-    });
-  }, []);
+
+      if (enrichmentPendingRef.current.length > 0) {
+        void processEnrichmentQueue();
+      }
+    }
+  }, [flushEnrichmentUpdates, scheduleEnrichmentFlush]);
+
+  const enrichBooks = useCallback(
+    (bookList: Book[]) => {
+      if (bookList.length === 0) {
+        return;
+      }
+
+      enrichmentPendingRef.current.push(...bookList);
+      void processEnrichmentQueue();
+    },
+    [processEnrichmentQueue],
+  );
 
   const finalizeBooks = useCallback(
     async (merged: Book[]) => {
-      const withCovers = await Promise.all(
-        merged.map(async book => {
-          const storedCover = book.coverUri;
-          const coverUri =
-            storedCover && (await isCoverUriValid(storedCover))
-              ? storedCover
-              : (await getCachedCoverUri(book.fileUrl)) ?? undefined;
-          return coverUri ? { ...book, coverUri } : book;
-        }),
-      );
-
-      setBooks(withCovers);
-      await saveCachedBooks(withCovers);
-      enrichBooks(withCovers.filter(book => !book.coverUri));
+      setBooks(merged);
+      await saveCachedBooks(merged);
+      enrichBooks(merged.filter(book => !book.coverUri));
     },
     [enrichBooks],
   );
@@ -124,17 +173,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const reextractCovers = useCallback(() => {
-    if (enrichingRef.current) {
-      return;
+    const missing = booksRef.current.filter(book => !book.coverUri);
+    if (missing.length > 0) {
+      enrichBooks(missing);
     }
-
-    setBooks(prev => {
-      const missing = prev.filter(book => !book.coverUri);
-      if (missing.length > 0) {
-        enrichBooks(missing);
-      }
-      return prev;
-    });
   }, [enrichBooks]);
 
   const refreshLibrary = useCallback(async () => {

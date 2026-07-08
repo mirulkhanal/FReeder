@@ -243,6 +243,7 @@ export function DiscoverScreen() {
         const draft = {
           url: values.url.trim(),
           title: values.title.trim(),
+          opdsVersion: values.opdsVersion,
           username: values.username,
           password: values.password,
         };
@@ -250,6 +251,7 @@ export function DiscoverScreen() {
           id: 'probe',
           title: draft.title,
           url: draft.url,
+          opdsVersion: draft.opdsVersion,
           username: draft.username,
           password: values.password,
         });

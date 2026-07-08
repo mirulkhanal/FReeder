@@ -1,6 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
+import { StyleSheet, View } from 'react-native';
 
+import { CoverEnrichmentBar } from '../components/library/CoverEnrichmentBar';
 import { SereneTabBar } from '../components/SereneTabBar';
 import { DiscoverScreen } from '../screens/DiscoverScreen';
 import { LibraryScreen } from '../screens/LibraryScreen';
@@ -20,17 +22,26 @@ export function MainTabs() {
   );
 
   return (
-    <Tab.Navigator
-      id="main-tabs"
-      tabBar={renderTabBar}
-      screenOptions={{
-        headerShown: false,
-        sceneStyle: { backgroundColor: colors.background },
-      }}
-    >
-      <Tab.Screen name="LibraryTab" component={LibraryScreen} />
-      <Tab.Screen name="DiscoverTab" component={DiscoverScreen} />
-      <Tab.Screen name="SettingsTab" component={SettingsScreen} />
-    </Tab.Navigator>
+    <View style={styles.root}>
+      <Tab.Navigator
+        id="main-tabs"
+        tabBar={renderTabBar}
+        screenOptions={{
+          headerShown: false,
+          sceneStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Tab.Screen name="LibraryTab" component={LibraryScreen} />
+        <Tab.Screen name="DiscoverTab" component={DiscoverScreen} />
+        <Tab.Screen name="SettingsTab" component={SettingsScreen} />
+      </Tab.Navigator>
+      <CoverEnrichmentBar />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});

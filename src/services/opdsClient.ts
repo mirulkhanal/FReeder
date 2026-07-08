@@ -36,9 +36,16 @@ async function catalogWithPassword(catalog: OpdsCatalog): Promise<OpdsCatalog> {
 }
 
 function requestHeaders(catalog: OpdsCatalog): Record<string, string> {
+  const version = catalog.opdsVersion ?? 'auto';
+  const accept =
+    version === '2'
+      ? 'application/opds+json, application/json, */*'
+      : version === '1'
+      ? 'application/atom+xml, application/xml, text/xml, application/opds+json, application/json, */*'
+      : 'application/opds+json, application/atom+xml, application/xml, text/xml, application/json, */*';
+
   return {
-    Accept:
-      'application/opds+json, application/atom+xml, application/xml, text/xml, application/json, */*',
+    Accept: accept,
     'User-Agent': 'FReeder/0.0.1 (OPDS)',
     ...authHeader(catalog, catalog.password),
   };
@@ -71,7 +78,11 @@ function describeFetchFailure(error: unknown, url: string): Error {
   return error instanceof Error ? error : new Error('Catalog request failed.');
 }
 
-function describeHttpFailure(status: number, url: string): Error {
+function describeHttpFailure(
+  status: number,
+  url: string,
+  catalog: OpdsCatalog,
+): Error {
   if (status === 401 || status === 403) {
     return new Error(
       `Authentication failed (${status}) for ${formatHost(
@@ -79,8 +90,12 @@ function describeHttpFailure(status: number, url: string): Error {
       )}. Edit the catalog and add your Komga username and password.`,
     );
   }
+  const versionHint =
+    catalog.opdsVersion && catalog.opdsVersion !== 'auto'
+      ? ` Try switching OPDS version from v${catalog.opdsVersion} to Auto in catalog settings.`
+      : ' If this is an OPDS 2 endpoint, try setting OPDS version to v2 in catalog settings.';
   return new Error(
-    `Catalog request failed (${status}) for ${formatHost(url)}.`,
+    `Catalog request failed (${status}) for ${formatHost(url)}.${versionHint}`,
   );
 }
 
@@ -105,7 +120,7 @@ export async function fetchOpdsXml(
   }
 
   if (response.status < 200 || response.status >= 300) {
-    throw describeHttpFailure(response.status, url);
+    throw describeHttpFailure(response.status, url, catalog);
   }
 
   return response.body;
@@ -130,6 +145,15 @@ export async function fetchOpdsFeed(
   url: string,
 ): Promise<OpdsFeed> {
   const body = await fetchOpdsXml(catalog, url);
+  const version = catalog.opdsVersion ?? 'auto';
+
+  if (version === '2') {
+    return parseOpds2Feed(body);
+  }
+  if (version === '1') {
+    return parseOpdsFeed(body);
+  }
+
   if (isOpds2Json(body)) {
     return parseOpds2Feed(body);
   }
@@ -141,6 +165,16 @@ export async function fetchOpenSearchTemplate(
   descriptionUrl: string,
 ): Promise<OpdsSearchTemplate | null> {
   const body = await fetchOpdsXml(catalog, descriptionUrl);
+  const version = catalog.opdsVersion ?? 'auto';
+
+  if (version === '2') {
+    const feed = parseOpds2Feed(body);
+    return parseOpds2SearchTemplate(feed, descriptionUrl);
+  }
+  if (version === '1') {
+    return parseOpenSearchDescription(body);
+  }
+
   if (isOpds2Json(body)) {
     const feed = parseOpds2Feed(body);
     return parseOpds2SearchTemplate(feed, descriptionUrl);
