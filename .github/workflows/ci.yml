@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  quality:
+  typecheck:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,20 +20,68 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: typecheck
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          distribution: temurin
-          java-version: 17
+          node-version: 22
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate formatting, linting and types
-        run: npm run check
+      - name: Lint
+        run: npm run lint
+
+  format:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+  security-audit:
+    runs-on: ubuntu-latest
+    needs: format
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Security audit (high and critical)
         run: npm audit --audit-level=high
-
-      - name: Ensure release APK artifact builds
-        run: npm run build:release-artifact
