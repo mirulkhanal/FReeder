@@ -1,9 +1,12 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import type { Book } from '../types/book';
+
+import { useTheme } from '../theme';
+
 import { BookCover } from './BookCover';
 import { ReadingProgressBar } from './ReadingProgressBar';
-import { useTheme } from '../theme';
+
+import type { Book } from '../types/book';
 
 type BookGridItemProps = {
   book: Book;
@@ -33,19 +36,25 @@ export function BookGridItem({
       accessibilityRole="button"
       onPress={() => onPress(book)}
       onLongPress={onLongPress ? () => onLongPress(book) : undefined}
-      style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}>
+      style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
+    >
       <View
         style={[
           styles.coverFrame,
           {
             shadowColor: '#000',
           },
-        ]}>
+        ]}
+      >
         <BookCover book={book} />
         {missing ? (
           <View style={styles.missingOverlay}>
-            <Text style={[typography.caption, styles.missingText]}>Missing file</Text>
-            <Text style={[typography.caption, styles.missingHint]}>Tap to locate</Text>
+            <Text style={[typography.caption, styles.missingText]}>
+              Missing file
+            </Text>
+            <Text style={[typography.caption, styles.missingHint]}>
+              Tap to locate
+            </Text>
           </View>
         ) : null}
         {showProgress ? (
@@ -60,10 +69,16 @@ export function BookGridItem({
         ) : null}
       </View>
       <View style={styles.meta}>
-        <Text style={[typography.titleMd, { color: colors.onSurface }]} numberOfLines={1}>
+        <Text
+          style={[typography.titleMd, { color: colors.onSurface }]}
+          numberOfLines={1}
+        >
           {book.title}
         </Text>
-        <Text style={[typography.caption, { color: colors.onSurfaceVariant }]} numberOfLines={1}>
+        <Text
+          style={[typography.caption, { color: colors.onSurfaceVariant }]}
+          numberOfLines={1}
+        >
           {missing ? 'Tap to locate file' : author ?? 'Unknown author'}
         </Text>
       </View>
@@ -84,27 +99,39 @@ export function ImportBookTile({ loading, onPress }: ImportBookTileProps) {
       accessibilityRole="button"
       disabled={loading}
       onPress={onPress}
-      style={({ pressed }) => [styles.item, pressed && !loading && styles.itemPressed]}>
+      style={({ pressed }) => [
+        styles.item,
+        pressed && !loading && styles.itemPressed,
+      ]}
+    >
       <View
         style={[
           styles.coverFrame,
           {
             shadowColor: '#000',
           },
-        ]}>
+        ]}
+      >
         <View
           style={[
             styles.importInner,
             { backgroundColor: colors.surfaceContainer },
-          ]}>
+          ]}
+        >
           <Text style={[styles.importPlus, { color: colors.outline }]}>+</Text>
         </View>
       </View>
       <View style={styles.meta}>
-        <Text style={[typography.titleMd, { color: colors.onSurface }]} numberOfLines={1}>
+        <Text
+          style={[typography.titleMd, { color: colors.onSurface }]}
+          numberOfLines={1}
+        >
           Import Book
         </Text>
-        <Text style={[typography.caption, { color: colors.onSurfaceVariant }]} numberOfLines={1}>
+        <Text
+          style={[typography.caption, { color: colors.onSurfaceVariant }]}
+          numberOfLines={1}
+        >
           Add EPUB file or folder
         </Text>
       </View>
@@ -141,7 +168,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   missingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'center',

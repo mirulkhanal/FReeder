@@ -1,6 +1,56 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+
+def projectRoot = settingsDir.parentFile
+
+def resolveNodeBinary() {
+    def nodeEnv = System.getenv("NODE_BINARY")
+    if (nodeEnv != null && !nodeEnv.trim().isEmpty()) {
+        return nodeEnv.trim()
+    }
+
+    def localProperties = new File(settingsDir, "local.properties")
+    if (localProperties.exists()) {
+        def props = new Properties()
+        localProperties.withInputStream { props.load(it) }
+        def nodeDir = props.getProperty("nodejs.dir")
+        if (nodeDir != null) {
+            def nodeFromDir = new File(nodeDir, "bin/node")
+            if (nodeFromDir.exists()) {
+                return nodeFromDir.absolutePath
+            }
+            nodeFromDir = new File(nodeDir, "node")
+            if (nodeFromDir.exists()) {
+                return nodeFromDir.absolutePath
+            }
+        }
+    }
+
+    def home = System.getProperty("user.home")
+    def commonPaths = [
+        "$home/.volta/bin/node",
+        "/usr/local/bin/node",
+        "/usr/bin/node",
+    ]
+    for (path in commonPaths) {
+        if (new File(path).exists()) {
+            return path
+        }
+    }
+
+    return "node"
+}
+
+def nodeBinary = resolveNodeBinary()
+def cliJs = new File(projectRoot, "node_modules/@react-native-community/cli/build/bin.js")
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand(
+        [nodeBinary, cliJs.absolutePath, "config"],
+        projectRoot
+    )
+}
+
 rootProject.name = 'FReeder'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')

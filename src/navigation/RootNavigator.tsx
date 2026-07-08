@@ -1,13 +1,16 @@
-import React from 'react';
 import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTheme } from '../theme';
+import React from 'react';
+
 import { ReaderScreen } from '../screens/ReaderScreen';
+import { useTheme } from '../theme';
+
 import { MainTabs } from './MainTabs';
+
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -31,6 +34,7 @@ export function RootNavigator() {
   return (
     <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator
+        id="root-stack"
         screenOptions={{
           headerShadowVisible: false,
           headerStyle: { backgroundColor: colors.surface },
@@ -40,7 +44,8 @@ export function RootNavigator() {
             fontWeight: '600',
           },
           contentStyle: { backgroundColor: colors.background },
-        }}>
+        }}
+      >
         <Stack.Screen
           name="MainTabs"
           component={MainTabs}

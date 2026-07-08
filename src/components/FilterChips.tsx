@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+
 import { useTheme } from '../theme';
 
 export type LibraryFilter =
@@ -31,7 +32,8 @@ export function FilterChips({ active, onChange }: FilterChipsProps) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.row}>
+      contentContainerStyle={styles.row}
+    >
       {FILTERS.map(filter => {
         const isActive = filter.id === active;
         return (
@@ -50,12 +52,16 @@ export function FilterChips({ active, onChange }: FilterChipsProps) {
                     borderWidth: 1,
                   },
               pressed && { opacity: 0.92, transform: [{ scale: 0.97 }] },
-            ]}>
+            ]}
+          >
             <Text
               style={[
                 typography.button,
-                { color: isActive ? colors.onPrimary : colors.onSurfaceVariant },
-              ]}>
+                {
+                  color: isActive ? colors.onPrimary : colors.onSurfaceVariant,
+                },
+              ]}
+            >
               {filter.label}
             </Text>
           </Pressable>

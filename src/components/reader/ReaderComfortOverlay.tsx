@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+
 import type { ReaderChromePrefs } from '../../services/readerChromePrefs';
 
 type ReaderComfortOverlayProps = {
@@ -7,7 +8,9 @@ type ReaderComfortOverlayProps = {
 };
 
 /** Non-interactive brightness and blue-light layers above the reader. */
-export function ReaderComfortOverlay({ chromePrefs }: ReaderComfortOverlayProps) {
+export function ReaderComfortOverlay({
+  chromePrefs,
+}: ReaderComfortOverlayProps) {
   const { brightnessOverlay, blueLightFilter } = chromePrefs;
 
   if (brightnessOverlay <= 0 && !blueLightFilter) {
@@ -18,7 +21,10 @@ export function ReaderComfortOverlay({ chromePrefs }: ReaderComfortOverlayProps)
     <View pointerEvents="none" style={styles.root}>
       {brightnessOverlay > 0 ? (
         <View
-          style={[styles.layer, { backgroundColor: `rgba(0, 0, 0, ${brightnessOverlay})` }]}
+          style={[
+            styles.layer,
+            { backgroundColor: `rgba(0, 0, 0, ${brightnessOverlay})` },
+          ]}
         />
       ) : null}
       {blueLightFilter ? (

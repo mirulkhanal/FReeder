@@ -1,11 +1,14 @@
 import { FileSystem } from 'react-native-file-access';
-import type { Book } from '../types/book';
+
 import {
   createBookFromScan,
   generateBookId,
   isLegacyPathBookId,
 } from '../types/book';
+
 import { migrateReadingStateId } from './readingProgress';
+
+import type { Book } from '../types/book';
 
 export type ScannedBookEntry = {
   fileUrl: string;
@@ -58,7 +61,9 @@ export async function mergeScannedWithLibrary(
   const cachedByUrl = new Map(
     migratedCache.map(book => [normalizeUrl(book.fileUrl), book]),
   );
-  const scannedUrls = new Set(scanned.map(entry => normalizeUrl(entry.fileUrl)));
+  const scannedUrls = new Set(
+    scanned.map(entry => normalizeUrl(entry.fileUrl)),
+  );
   const merged: Book[] = [];
 
   for (const entry of scanned) {

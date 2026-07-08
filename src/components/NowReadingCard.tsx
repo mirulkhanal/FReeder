@@ -1,9 +1,12 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import type { Book } from '../types/book';
+
+import { useTheme } from '../theme';
+
 import { BookCover } from './BookCover';
 import { ReadingProgressBar } from './ReadingProgressBar';
-import { useTheme } from '../theme';
+
+import type { Book } from '../types/book';
 
 type NowReadingCardProps = {
   book: Book;
@@ -36,18 +39,28 @@ export function NowReadingCard({
           opacity: pressed ? 0.98 : 1,
           transform: [{ scale: pressed ? 0.995 : 1 }],
         },
-      ]}>
+      ]}
+    >
       <View style={styles.coverWrap}>
         <BookCover book={book} />
       </View>
       <View style={styles.body}>
         <View>
           <View style={styles.badge}>
-            <Text style={[typography.caption, styles.badgeText, { color: colors.primary }]}>
+            <Text
+              style={[
+                typography.caption,
+                styles.badgeText,
+                { color: colors.primary },
+              ]}
+            >
               Now Reading
             </Text>
           </View>
-          <Text style={[typography.headlineLg, { color: colors.onSurface }]} numberOfLines={2}>
+          <Text
+            style={[typography.headlineLg, { color: colors.onSurface }]}
+            numberOfLines={2}
+          >
             {book.title}
           </Text>
           <Text
@@ -56,7 +69,8 @@ export function NowReadingCard({
               styles.author,
               { color: colors.onSurfaceVariant, fontStyle: 'italic' },
             ]}
-            numberOfLines={1}>
+            numberOfLines={1}
+          >
             {author ?? 'Unknown author'}
           </Text>
         </View>

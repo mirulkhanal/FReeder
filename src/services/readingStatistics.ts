@@ -42,7 +42,9 @@ export async function loadReadingStatistics(): Promise<ReadingStatistics> {
   }
 }
 
-export async function saveReadingStatistics(stats: ReadingStatistics): Promise<void> {
+export async function saveReadingStatistics(
+  stats: ReadingStatistics,
+): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
 }
 

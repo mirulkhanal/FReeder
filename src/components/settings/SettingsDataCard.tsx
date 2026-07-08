@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../theme';
 
 type SettingsDataCardProps = {
@@ -21,10 +22,18 @@ export function SettingsDataCard({
   const { colors, typography } = useTheme();
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surfaceContainerLow }]}>
-      <Text style={[typography.body, styles.copy, { color: colors.onSurfaceVariant }]}>
-        Back up reading progress, bookmarks, highlights, collections, and preferences.
-        Export a JSON file to move data between devices.
+    <View
+      style={[styles.card, { backgroundColor: colors.surfaceContainerLow }]}
+    >
+      <Text
+        style={[
+          typography.body,
+          styles.copy,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
+        Back up reading progress, bookmarks, highlights, collections, and
+        preferences. Export a JSON file to move data between devices.
       </Text>
 
       <ActionButton
@@ -86,12 +95,17 @@ function ActionButton({
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: pressed ? colors.surfaceContainerHigh : colors.surfaceContainerLowest,
+          backgroundColor: pressed
+            ? colors.surfaceContainerHigh
+            : colors.surfaceContainerLowest,
           borderColor: colors.outlineVariant,
         },
-      ]}>
+      ]}
+    >
       <Icon name={icon} size={20} color={colors.primary} />
-      <Text style={[typography.button, { color: colors.onSurface }]}>{label}</Text>
+      <Text style={[typography.button, { color: colors.onSurface }]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

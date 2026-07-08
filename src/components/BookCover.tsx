@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import type { Book } from '../types/book';
+
 import { isCoverUriValid } from '../services/epubCover';
 import { useTheme } from '../theme';
+
+import type { Book } from '../types/book';
 
 const COVER_PALETTES = [
   { bg: '#4352a5', text: '#f8f6ff' },
@@ -15,9 +17,9 @@ const COVER_PALETTES = [
 function hashTitle(title: string): number {
   let hash = 0;
   for (let i = 0; i < title.length; i += 1) {
-    hash = (hash * 31 + title.charCodeAt(i)) >>> 0;
+    hash = (Math.imul(hash, 31) + title.charCodeAt(i)) % 4294967296;
   }
-  return hash;
+  return Math.abs(hash);
 }
 
 type BookCoverProps = {
@@ -65,9 +67,20 @@ export function BookCover({ book }: BookCoverProps) {
   }
 
   return (
-    <View style={[styles.cover, styles.placeholder, { backgroundColor: palette.bg }]}>
+    <View
+      style={[
+        styles.cover,
+        styles.placeholder,
+        { backgroundColor: palette.bg },
+      ]}
+    >
       <Text style={[styles.initial, { color: palette.text }]}>{initial}</Text>
-      <View style={[styles.spine, { backgroundColor: colors.surfaceContainerHighest }]} />
+      <View
+        style={[
+          styles.spine,
+          { backgroundColor: colors.surfaceContainerHighest },
+        ]}
+      />
     </View>
   );
 }

@@ -1,16 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
 import { FileSystem } from 'react-native-file-access';
-import { loadAllBookmarksMap } from './bookBookmarks';
+
+import { loadAppAppearance } from './appAppearance';
 import { loadAllHighlightsMap } from './bookAnnotations';
+import { loadAllBookmarksMap } from './bookBookmarks';
+import { loadAllBookReaderPrefs } from './bookReaderPrefs';
 import { loadCollections } from './collectionsStorage';
 import { loadCachedBooks } from './libraryStorage';
-import { loadAllBookReaderPrefs } from './bookReaderPrefs';
 import { loadReaderChromePrefs } from './readerChromePrefs';
 import { loadReaderPreferences } from './readerPreferences';
-import { loadReadingStatistics } from './readingStatistics';
 import { loadAllReadingStates } from './readingProgress';
-import { loadAppAppearance } from './appAppearance';
+import { loadReadingStatistics } from './readingStatistics';
 
 export const BACKUP_VERSION = 2;
 
@@ -139,7 +140,8 @@ export async function pickAndImportAppBackup(): Promise<boolean> {
     destination: 'cachesDirectory',
   });
 
-  const path = copy?.localUri ?? file.uri;
+  const path =
+    copy?.status === 'success' && copy.localUri ? copy.localUri : file.uri;
   const raw = await FileSystem.readFile(path.replace(/^file:\/\//, ''), 'utf8');
   const payload = JSON.parse(raw) as AppBackupPayload;
   if (!payload?.version) {

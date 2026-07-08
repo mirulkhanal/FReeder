@@ -7,16 +7,18 @@ import React, {
   useState,
 } from 'react';
 import { useColorScheme } from 'react-native';
-import { paletteToTheme, type ThemeColors } from './colors';
-import { radius } from './spacing';
-import { serene, sereneDark } from './sereneColors';
-import { typography } from './typography';
+
 import {
   DEFAULT_APP_APPEARANCE,
   loadAppAppearance,
   saveAppAppearance,
   type AppAppearanceMode,
 } from '../services/appAppearance';
+
+import { paletteToTheme, type ThemeColors } from './colors';
+import { serene, sereneDark } from './sereneColors';
+import { radius } from './spacing';
+import { typography } from './typography';
 
 export type Theme = {
   colors: ThemeColors;

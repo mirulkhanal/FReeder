@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import type { ReaderPreferences } from './readerPreferences';
 
 const STORAGE_KEY = '@freeder/bookReaderPrefs';

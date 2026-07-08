@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../theme';
 
 type ReaderHeaderProps = {
@@ -38,7 +39,9 @@ export function ReaderHeader({
 
   const backgroundColor = surfaceColor ?? 'rgba(255, 255, 255, 0.94)';
   const labelColor = textColor ?? colors.onSurface;
-  const favoriteColor = favorite ? (activeIconColor ?? colors.primary) : labelColor;
+  const favoriteColor = favorite
+    ? activeIconColor ?? colors.primary
+    : labelColor;
   const headerTitle = chapterTitle?.trim()
     ? `${bookTitle}: ${chapterTitle.trim()}`
     : bookTitle;
@@ -68,7 +71,8 @@ export function ReaderHeader({
           opacity,
           transform: [{ translateY }],
         },
-      ]}>
+      ]}
+    >
       <View style={[styles.bar, { backgroundColor }]}>
         <Pressable
           accessibilityLabel="Back to library"
@@ -78,13 +82,15 @@ export function ReaderHeader({
             onInteraction();
             onBack();
           }}
-          style={styles.iconButton}>
+          style={styles.iconButton}
+        >
           <Icon name="arrow-back" size={22} color={labelColor} />
         </Pressable>
         <Text
           accessibilityRole="header"
           numberOfLines={1}
-          style={[typography.titleMd, styles.title, { color: labelColor }]}>
+          style={[typography.titleMd, styles.title, { color: labelColor }]}
+        >
           {headerTitle}
         </Text>
         <Pressable
@@ -95,7 +101,8 @@ export function ReaderHeader({
             onInteraction();
             onOpenInfo();
           }}
-          style={styles.iconButton}>
+          style={styles.iconButton}
+        >
           <Icon name="info-outline" size={20} color={labelColor} />
         </Pressable>
         <Pressable
@@ -106,7 +113,8 @@ export function ReaderHeader({
             onInteraction();
             onToggleFavorite();
           }}
-          style={styles.iconButton}>
+          style={styles.iconButton}
+        >
           <Icon
             name={favorite ? 'favorite' : 'favorite-border'}
             size={20}

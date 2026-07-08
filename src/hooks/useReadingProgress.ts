@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+
 import {
   loadAllReadingStates,
   type ReadingState,
@@ -15,7 +16,7 @@ export function useReadingProgress() {
   }, []);
 
   useEffect(() => {
-    reload();
+    void reload();
   }, [reload]);
 
   return { states, ready, reload };

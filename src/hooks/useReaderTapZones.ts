@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
+
+import type { TapZones } from '../services/readerChromePrefs';
 import type { RefObject } from 'react';
 import type { ReadiumViewRef } from 'react-native-readium';
-import type { TapZones } from '../services/readerChromePrefs';
 
 export function useReaderTapZones(
   readerRef: RefObject<ReadiumViewRef | null>,

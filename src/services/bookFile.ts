@@ -9,8 +9,7 @@ function sanitizeFileName(name: string): string {
 function cacheKeyForUri(sourceUri: string): string {
   let hash = 0;
   for (let i = 0; i < sourceUri.length; i += 1) {
-    hash = (hash << 5) - hash + sourceUri.charCodeAt(i);
-    hash |= 0;
+    hash = (Math.imul(hash, 31) + sourceUri.charCodeAt(i)) % 4294967296;
   }
   return Math.abs(hash).toString(16);
 }
@@ -32,7 +31,9 @@ export async function resolveReadableBookUri(
   }
 
   const safeName = sanitizeFileName(fileName);
-  const cachePath = `${BOOK_CACHE_DIR}/${cacheKeyForUri(sourceUri)}_${safeName}`;
+  const cachePath = `${BOOK_CACHE_DIR}/${cacheKeyForUri(
+    sourceUri,
+  )}_${safeName}`;
 
   if (await FileSystem.exists(cachePath)) {
     return `file://${cachePath}`;
@@ -49,7 +50,9 @@ export async function clearCachedBookCopy(
   fileName: string,
 ): Promise<void> {
   const safeName = sanitizeFileName(fileName);
-  const cachePath = `${BOOK_CACHE_DIR}/${cacheKeyForUri(sourceUri)}_${safeName}`;
+  const cachePath = `${BOOK_CACHE_DIR}/${cacheKeyForUri(
+    sourceUri,
+  )}_${safeName}`;
 
   if (!(await FileSystem.exists(cachePath))) {
     return;

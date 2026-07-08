@@ -1,6 +1,9 @@
 import React from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import { useTheme } from '../../theme';
+
 import type {
   ReaderPreferences,
   ReaderTheme,
@@ -8,7 +11,6 @@ import type {
   SpreadMode,
   ImageFilterMode,
 } from '../../services/readerPreferences';
-import { useTheme } from '../../theme';
 
 const READING_MODES: Array<{ id: ReadingMode; label: string }> = [
   { id: 'paginated', label: 'Pages' },
@@ -77,7 +79,9 @@ export function SettingsReadingCard({
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surfaceContainerLowest }]}>
+    <View
+      style={[styles.card, { backgroundColor: colors.surfaceContainerLowest }]}
+    >
       <FieldLabel text="Reading Mode" />
       <View style={styles.pillRow}>
         {READING_MODES.map(mode => {
@@ -91,14 +95,23 @@ export function SettingsReadingCard({
               style={[
                 styles.pill,
                 selected
-                  ? [styles.pillActive, { backgroundColor: colors.primaryContainer }]
+                  ? [
+                      styles.pillActive,
+                      { backgroundColor: colors.primaryContainer },
+                    ]
                   : { backgroundColor: colors.surfaceContainerLow },
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   typography.button,
-                  { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-                ]}>
+                  {
+                    color: selected
+                      ? colors.onPrimary
+                      : colors.onSurfaceVariant,
+                  },
+                ]}
+              >
                 {mode.label}
               </Text>
             </Pressable>
@@ -114,8 +127,8 @@ export function SettingsReadingCard({
             theme.id === 'dark' && !selected
               ? colors.onSurfaceVariant
               : selected
-                ? colors.primary
-                : colors.onSurfaceVariant;
+              ? colors.primary
+              : colors.onSurfaceVariant;
           return (
             <Pressable
               key={theme.id}
@@ -126,21 +139,28 @@ export function SettingsReadingCard({
                 styles.themeCard,
                 {
                   backgroundColor: theme.cardBg,
-                  borderColor: selected ? colors.primaryContainer : colors.surfaceContainer,
+                  borderColor: selected
+                    ? colors.primaryContainer
+                    : colors.surfaceContainer,
                   borderWidth: selected ? 2 : 1,
                 },
-              ]}>
+              ]}
+            >
               <View
                 style={[
                   styles.swatch,
                   {
                     backgroundColor: theme.swatch,
                     borderColor:
-                      theme.id === 'light' ? colors.outlineVariant : 'rgba(0,0,0,0.08)',
+                      theme.id === 'light'
+                        ? colors.outlineVariant
+                        : 'rgba(0,0,0,0.08)',
                   },
                 ]}
               />
-              <Text style={[typography.caption, { color: labelColor }]}>{theme.label}</Text>
+              <Text style={[typography.caption, { color: labelColor }]}>
+                {theme.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -159,15 +179,24 @@ export function SettingsReadingCard({
               style={[
                 styles.fontChip,
                 selected
-                  ? [styles.fontChipActive, { backgroundColor: colors.primaryContainer }]
+                  ? [
+                      styles.fontChipActive,
+                      { backgroundColor: colors.primaryContainer },
+                    ]
                   : { backgroundColor: colors.surfaceContainerLow },
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   typography.button,
                   fontTextStyle(font.style),
-                  { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-                ]}>
+                  {
+                    color: selected
+                      ? colors.onPrimary
+                      : colors.onSurfaceVariant,
+                  },
+                ]}
+              >
                 {font.label}
               </Text>
             </Pressable>
@@ -188,14 +217,23 @@ export function SettingsReadingCard({
               style={[
                 styles.pill,
                 selected
-                  ? [styles.pillActive, { backgroundColor: colors.primaryContainer }]
+                  ? [
+                      styles.pillActive,
+                      { backgroundColor: colors.primaryContainer },
+                    ]
                   : { backgroundColor: colors.surfaceContainerLow },
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   typography.button,
-                  { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-                ]}>
+                  {
+                    color: selected
+                      ? colors.onPrimary
+                      : colors.onSurfaceVariant,
+                  },
+                ]}
+              >
                 {align.label}
               </Text>
             </Pressable>
@@ -255,14 +293,23 @@ export function SettingsReadingCard({
                   style={[
                     styles.pill,
                     selected
-                      ? [styles.pillActive, { backgroundColor: colors.primaryContainer }]
+                      ? [
+                          styles.pillActive,
+                          { backgroundColor: colors.primaryContainer },
+                        ]
                       : { backgroundColor: colors.surfaceContainerLow },
-                  ]}>
+                  ]}
+                >
                   <Text
                     style={[
                       typography.button,
-                      { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-                    ]}>
+                      {
+                        color: selected
+                          ? colors.onPrimary
+                          : colors.onSurfaceVariant,
+                      },
+                    ]}
+                  >
                     {option.label}
                   </Text>
                 </Pressable>
@@ -287,14 +334,23 @@ export function SettingsReadingCard({
                   style={[
                     styles.pill,
                     selected
-                      ? [styles.pillActive, { backgroundColor: colors.primaryContainer }]
+                      ? [
+                          styles.pillActive,
+                          { backgroundColor: colors.primaryContainer },
+                        ]
                       : { backgroundColor: colors.surfaceContainerLow },
-                  ]}>
+                  ]}
+                >
                   <Text
                     style={[
                       typography.button,
-                      { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-                    ]}>
+                      {
+                        color: selected
+                          ? colors.onPrimary
+                          : colors.onSurfaceVariant,
+                      },
+                    ]}
+                  >
                     {option.label}
                   </Text>
                 </Pressable>
@@ -306,7 +362,13 @@ export function SettingsReadingCard({
 
       <View style={styles.toggleRow}>
         <View style={styles.toggleCopy}>
-          <Text style={[typography.body, styles.toggleTitle, { color: colors.onSurface }]}>
+          <Text
+            style={[
+              typography.body,
+              styles.toggleTitle,
+              { color: colors.onSurface },
+            ]}
+          >
             Use publisher styles
           </Text>
           <Text style={[styles.toggleHint, { color: colors.outline }]}>
@@ -316,14 +378,23 @@ export function SettingsReadingCard({
         <Switch
           value={preferences.publisherStyles}
           onValueChange={publisherStyles => patch({ publisherStyles })}
-          trackColor={{ false: colors.surfaceContainerHighest, true: colors.primaryContainer }}
+          trackColor={{
+            false: colors.surfaceContainerHighest,
+            true: colors.primaryContainer,
+          }}
           thumbColor="#ffffff"
         />
       </View>
 
       <View style={styles.toggleRow}>
         <View style={styles.toggleCopy}>
-          <Text style={[typography.body, styles.toggleTitle, { color: colors.onSurface }]}>
+          <Text
+            style={[
+              typography.body,
+              styles.toggleTitle,
+              { color: colors.onSurface },
+            ]}
+          >
             Hyphenation
           </Text>
           <Text style={[styles.toggleHint, { color: colors.outline }]}>
@@ -333,12 +404,20 @@ export function SettingsReadingCard({
         <Switch
           value={preferences.hyphens}
           onValueChange={hyphens => patch({ hyphens })}
-          trackColor={{ false: colors.surfaceContainerHighest, true: colors.primaryContainer }}
+          trackColor={{
+            false: colors.surfaceContainerHighest,
+            true: colors.primaryContainer,
+          }}
           thumbColor="#ffffff"
         />
       </View>
 
-      <View style={[styles.resetDivider, { borderTopColor: colors.surfaceContainerLow }]} />
+      <View
+        style={[
+          styles.resetDivider,
+          { borderTopColor: colors.surfaceContainerLow },
+        ]}
+      />
       <Pressable
         accessibilityRole="button"
         onPress={onReset}
@@ -346,9 +425,12 @@ export function SettingsReadingCard({
           styles.resetButton,
           {
             borderColor: colors.outlineVariant,
-            backgroundColor: pressed ? colors.surfaceContainerLow : 'transparent',
+            backgroundColor: pressed
+              ? colors.surfaceContainerLow
+              : 'transparent',
           },
-        ]}>
+        ]}
+      >
         <Text style={[typography.button, { color: colors.onSurfaceVariant }]}>
           Reset reading settings to default
         </Text>
@@ -360,7 +442,9 @@ export function SettingsReadingCard({
 function FieldLabel({ text }: { text: string }) {
   const { colors, typography } = useTheme();
   return (
-    <Text style={[typography.caption, styles.fieldLabel, { color: colors.outline }]}>
+    <Text
+      style={[typography.caption, styles.fieldLabel, { color: colors.outline }]}
+    >
       {text.toUpperCase()}
     </Text>
   );
@@ -385,26 +469,44 @@ function PreferenceSlider({
 }) {
   const { colors, typography } = useTheme();
   const progress = (value - min) / (max - min);
-  const decrease = () => onChange(Math.max(min, Number((value - step).toFixed(2))));
-  const increase = () => onChange(Math.min(max, Number((value + step).toFixed(2))));
+  const decrease = () =>
+    onChange(Math.max(min, Number((value - step).toFixed(2))));
+  const increase = () =>
+    onChange(Math.min(max, Number((value + step).toFixed(2))));
 
   return (
     <View style={styles.sliderBlock}>
       <View style={styles.sliderHeader}>
-        <Text style={[typography.caption, styles.fieldLabel, { color: colors.outline }]}>
+        <Text
+          style={[
+            typography.caption,
+            styles.fieldLabel,
+            { color: colors.outline },
+          ]}
+        >
           {label.toUpperCase()}
         </Text>
-        <Text style={[typography.titleMd, { color: colors.primary }]}>{format(value)}</Text>
+        <Text style={[typography.titleMd, { color: colors.primary }]}>
+          {format(value)}
+        </Text>
       </View>
       <View style={styles.sliderRow}>
         <Pressable accessibilityRole="button" hitSlop={8} onPress={decrease}>
           <Icon name="remove-circle-outline" size={24} color={colors.primary} />
         </Pressable>
-        <View style={[styles.track, { backgroundColor: colors.surfaceContainerHighest }]}>
+        <View
+          style={[
+            styles.track,
+            { backgroundColor: colors.surfaceContainerHighest },
+          ]}
+        >
           <View
             style={[
               styles.trackFill,
-              { backgroundColor: colors.primary, width: `${Math.round(progress * 100)}%` },
+              {
+                backgroundColor: colors.primary,
+                width: `${Math.round(progress * 100)}%`,
+              },
             ]}
           />
         </View>

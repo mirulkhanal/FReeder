@@ -1,4 +1,28 @@
-export const serene = {
+export type SerenePalette = {
+  primary: string;
+  onPrimary: string;
+  primaryContainer: string;
+  primaryFixedDim: string;
+  onPrimaryFixedVariant: string;
+  background: string;
+  surface: string;
+  surfaceContainerLowest: string;
+  surfaceContainerLow: string;
+  surfaceContainer: string;
+  surfaceContainerHigh: string;
+  surfaceContainerHighest: string;
+  onSurface: string;
+  onSurfaceVariant: string;
+  outline: string;
+  outlineVariant: string;
+  tertiaryFixedDim: string;
+  primaryFixedDimGlow: string;
+  tertiaryFixedDimGlow: string;
+  primaryContainerGlow: string;
+  shadowPrimary: string;
+};
+
+export const serene: SerenePalette = {
   primary: '#4352a5',
   onPrimary: '#ffffff',
   primaryContainer: '#5c6bc0',
@@ -20,9 +44,9 @@ export const serene = {
   tertiaryFixedDimGlow: 'rgba(246, 189, 88, 0.2)',
   primaryContainerGlow: 'rgba(92, 107, 192, 0.05)',
   shadowPrimary: 'rgba(67, 82, 165, 0.2)',
-} as const;
+};
 
-export const sereneDark = {
+export const sereneDark: SerenePalette = {
   primary: '#bac3ff',
   onPrimary: '#00105b',
   primaryContainer: '#5c6bc0',
@@ -44,6 +68,4 @@ export const sereneDark = {
   tertiaryFixedDimGlow: 'rgba(246, 189, 88, 0.15)',
   primaryContainerGlow: 'rgba(92, 107, 192, 0.1)',
   shadowPrimary: 'rgba(0, 0, 0, 0.3)',
-} as const;
-
-export type SerenePalette = typeof serene;
+};

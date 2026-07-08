@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type RefObject } from 'react';
+
 import type { Locator, ReadiumViewRef } from 'react-native-readium';
 
 export type ReaderSearchResult = {
@@ -24,7 +25,9 @@ type ReadiumSearchCapable = ReadiumViewRef & {
   cancelSearch?: () => void;
 };
 
-function searchRef(readerRef: RefObject<ReadiumViewRef | null>): ReadiumSearchCapable | null {
+function searchRef(
+  readerRef: RefObject<ReadiumViewRef | null>,
+): ReadiumSearchCapable | null {
   return readerRef.current as ReadiumSearchCapable | null;
 }
 

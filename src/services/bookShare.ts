@@ -1,14 +1,20 @@
 import { NativeModules, Platform, Share } from 'react-native';
-import { resolveReadableBookUri } from './bookFile';
-import type { Book } from '../types/book';
+import ShareModule from 'react-native-share';
+
 import { getBookFileName } from '../types/book';
+
+import { resolveReadableBookUri } from './bookFile';
+
+import type { Book } from '../types/book';
 
 type FreederFileShareModule = {
   shareFile: (path: string, mimeType: string, title: string) => Promise<void>;
 };
 
 function freederFileShare(): FreederFileShareModule | null {
-  const module = NativeModules.FreederFileShare as FreederFileShareModule | undefined;
+  const module = NativeModules.FreederFileShare as
+    | FreederFileShareModule
+    | undefined;
   return module?.shareFile ? module : null;
 }
 
@@ -18,7 +24,10 @@ function isRnShareLinked(): boolean {
 
 function isUserCancel(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return message.toLowerCase().includes('cancel') || message.toLowerCase().includes('dismiss');
+  return (
+    message.toLowerCase().includes('cancel') ||
+    message.toLowerCase().includes('dismiss')
+  );
 }
 
 async function shareWithRnShare(
@@ -31,9 +40,6 @@ async function shareWithRnShare(
   }
 
   try {
-    const ShareModule = require('react-native-share').default as {
-      open: (options: Record<string, unknown>) => Promise<unknown>;
-    };
     await ShareModule.open({
       title,
       subject: title,
@@ -52,7 +58,10 @@ async function shareWithRnShare(
   }
 }
 
-async function shareWithFreederModule(title: string, fileUri: string): Promise<boolean> {
+async function shareWithFreederModule(
+  title: string,
+  fileUri: string,
+): Promise<boolean> {
   const shareModule = freederFileShare();
   if (!shareModule) {
     return false;
@@ -76,7 +85,8 @@ export async function shareEpub(book: Book): Promise<void> {
 
   if (Platform.OS === 'android') {
     const sharedNative =
-      (await shareWithFreederModule(title, fileUri)) || (await shareWithRnShare(title, fileName, fileUri));
+      (await shareWithFreederModule(title, fileUri)) ||
+      (await shareWithRnShare(title, fileName, fileUri));
     if (sharedNative) {
       return;
     }

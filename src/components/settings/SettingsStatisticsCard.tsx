@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+
 import {
   formatReadingDuration,
   type ReadingStatistics,
@@ -20,8 +21,12 @@ function StatItem({ label, value }: StatItemProps) {
 
   return (
     <View style={styles.statItem}>
-      <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>{label}</Text>
-      <Text style={[typography.headline, { color: colors.onSurface }]}>{value}</Text>
+      <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+        {label}
+      </Text>
+      <Text style={[typography.headline, { color: colors.onSurface }]}>
+        {value}
+      </Text>
     </View>
   );
 }
@@ -37,7 +42,8 @@ export function SettingsStatisticsCard({ stats }: SettingsStatisticsCardProps) {
           backgroundColor: colors.surfaceContainerLowest,
           borderColor: colors.outlineVariant,
         },
-      ]}>
+      ]}
+    >
       <View style={styles.grid}>
         <StatItem
           label="Total reading time"
@@ -46,14 +52,24 @@ export function SettingsStatisticsCard({ stats }: SettingsStatisticsCardProps) {
         <StatItem label="Books finished" value={String(stats.booksFinished)} />
         <StatItem
           label="Current streak"
-          value={`${stats.currentStreakDays} day${stats.currentStreakDays === 1 ? '' : 's'}`}
+          value={`${stats.currentStreakDays} day${
+            stats.currentStreakDays === 1 ? '' : 's'
+          }`}
         />
         <StatItem
           label="Longest streak"
-          value={`${stats.longestStreakDays} day${stats.longestStreakDays === 1 ? '' : 's'}`}
+          value={`${stats.longestStreakDays} day${
+            stats.longestStreakDays === 1 ? '' : 's'
+          }`}
         />
       </View>
-      <Text style={[typography.caption, styles.footnote, { color: colors.onSurfaceVariant }]}>
+      <Text
+        style={[
+          typography.caption,
+          styles.footnote,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
         Reading time and streaks are tracked locally while you read in FReeder.
       </Text>
     </View>

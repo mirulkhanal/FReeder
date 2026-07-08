@@ -1,6 +1,8 @@
 import { FileSystem } from 'react-native-file-access';
-import type { Book } from '../types/book';
+
 import { getBookFileName } from '../types/book';
+
+import type { Book } from '../types/book';
 
 function stripScheme(uri: string): string {
   return uri.replace(/^file:\/\//, '');
@@ -23,7 +25,9 @@ export type DuplicateGroup = {
   books: Book[];
 };
 
-export async function findDuplicateBooks(books: Book[]): Promise<DuplicateGroup[]> {
+export async function findDuplicateBooks(
+  books: Book[],
+): Promise<DuplicateGroup[]> {
   const byHash = new Map<string, Book[]>();
 
   for (const book of books) {
@@ -55,7 +59,9 @@ export function findFilenameDuplicates(books: Book[]): Book[][] {
   return [...byName.values()].filter(group => group.length > 1);
 }
 
-export async function findTitleSizeDuplicates(books: Book[]): Promise<Book[][]> {
+export async function findTitleSizeDuplicates(
+  books: Book[],
+): Promise<Book[][]> {
   const byKey = new Map<string, Book[]>();
 
   for (const book of books) {

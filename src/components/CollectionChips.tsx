@@ -1,7 +1,9 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
-import type { BookCollection } from '../services/collectionsStorage';
+
 import { useTheme } from '../theme';
+
+import type { BookCollection } from '../services/collectionsStorage';
 
 type CollectionChipsProps = {
   collections: BookCollection[];
@@ -26,8 +28,15 @@ export function CollectionChips({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.row}>
-      <Text style={[typography.caption, styles.label, { color: colors.onSurfaceVariant }]}>
+      contentContainerStyle={styles.row}
+    >
+      <Text
+        style={[
+          typography.caption,
+          styles.label,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
         Collections
       </Text>
       <Pressable
@@ -44,15 +53,19 @@ export function CollectionChips({
                 borderWidth: 1,
               },
           pressed && { opacity: 0.92, transform: [{ scale: 0.97 }] },
-        ]}>
+        ]}
+      >
         <Text
           style={[
             typography.button,
             {
               color:
-                activeCollectionId === null ? colors.onPrimary : colors.onSurfaceVariant,
+                activeCollectionId === null
+                  ? colors.onPrimary
+                  : colors.onSurfaceVariant,
             },
-          ]}>
+          ]}
+        >
           All
         </Text>
       </Pressable>
@@ -74,12 +87,16 @@ export function CollectionChips({
                     borderWidth: 1,
                   },
               pressed && { opacity: 0.92, transform: [{ scale: 0.97 }] },
-            ]}>
+            ]}
+          >
             <Text
               style={[
                 typography.button,
-                { color: isActive ? colors.onPrimary : colors.onSurfaceVariant },
-              ]}>
+                {
+                  color: isActive ? colors.onPrimary : colors.onSurfaceVariant,
+                },
+              ]}
+            >
               {collection.name}
             </Text>
           </Pressable>
@@ -97,8 +114,11 @@ export function CollectionChips({
               borderColor: colors.outlineVariant,
             },
             pressed && { opacity: 0.92 },
-          ]}>
-          <Text style={[typography.button, { color: colors.primary }]}>Manage</Text>
+          ]}
+        >
+          <Text style={[typography.button, { color: colors.primary }]}>
+            Manage
+          </Text>
         </Pressable>
       ) : null}
     </ScrollView>

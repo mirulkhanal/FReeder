@@ -9,15 +9,17 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { BookCover } from '../BookCover';
+
 import {
   findDuplicateBooks,
   findTitleSizeDuplicates,
   type DuplicateGroup,
 } from '../../services/duplicateDetection';
-import { confirmRemoveDuplicate } from '../../utils/bookActions';
-import type { Book } from '../../types/book';
 import { useTheme } from '../../theme';
+import { confirmRemoveDuplicate } from '../../utils/bookActions';
+import { BookCover } from '../BookCover';
+
+import type { Book } from '../../types/book';
 
 type FindDuplicatesModalProps = {
   visible: boolean;
@@ -103,9 +105,19 @@ export function FindDuplicatesModal({
   };
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
             <Text style={[typography.headline, { color: colors.onSurface }]}>
               Duplicate books
@@ -118,14 +130,25 @@ export function FindDuplicatesModal({
           {loading ? (
             <View style={styles.centered}>
               <ActivityIndicator color={colors.primary} size="large" />
-              <Text style={[typography.body, { color: colors.onSurfaceVariant, marginTop: 12 }]}>
+              <Text
+                style={[
+                  typography.body,
+                  { color: colors.onSurfaceVariant, marginTop: 12 },
+                ]}
+              >
                 Scanning library…
               </Text>
             </View>
           ) : scanned && sections.length === 0 ? (
             <View style={styles.centered}>
               <Icon color={colors.primary} name="check-circle" size={40} />
-              <Text style={[typography.body, styles.emptyText, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[
+                  typography.body,
+                  styles.emptyText,
+                  { color: colors.onSurfaceVariant },
+                ]}
+              >
                 No duplicate EPUBs found.
               </Text>
             </View>
@@ -141,21 +164,30 @@ export function FindDuplicatesModal({
                       key={book.id}
                       style={[
                         styles.bookRow,
-                        { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant },
-                      ]}>
+                        {
+                          backgroundColor: colors.surfaceContainerLow,
+                          borderColor: colors.outlineVariant,
+                        },
+                      ]}
+                    >
                       <View style={styles.coverWrap}>
                         <BookCover book={book} />
                       </View>
                       <View style={styles.bookCopy}>
                         <Text
                           numberOfLines={2}
-                          style={[typography.body, { color: colors.onSurface }]}>
+                          style={[typography.body, { color: colors.onSurface }]}
+                        >
                           {book.title}
                         </Text>
                         {book.author ? (
                           <Text
                             numberOfLines={1}
-                            style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+                            style={[
+                              typography.caption,
+                              { color: colors.onSurfaceVariant },
+                            ]}
+                          >
                             {book.author}
                           </Text>
                         ) : null}
@@ -166,10 +198,17 @@ export function FindDuplicatesModal({
                         style={({ pressed }) => [
                           styles.removeButton,
                           {
-                            backgroundColor: pressed ? colors.surfaceContainerHigh : colors.surfaceContainerHighest,
+                            backgroundColor: pressed
+                              ? colors.surfaceContainerHigh
+                              : colors.surfaceContainerHighest,
                           },
-                        ]}>
-                        <Icon color={colors.error} name="delete-outline" size={20} />
+                        ]}
+                      >
+                        <Icon
+                          color={colors.error}
+                          name="delete-outline"
+                          size={20}
+                        />
                       </Pressable>
                     </View>
                   ))}

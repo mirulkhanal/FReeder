@@ -1,0 +1,8 @@
+node_modules/
+android/
+ios/
+dist/
+coverage/
+.tmp/
+logs.txt
+lin_logs.txt

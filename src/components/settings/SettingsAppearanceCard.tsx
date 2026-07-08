@@ -1,7 +1,9 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import type { AppAppearanceMode } from '../../services/appAppearance';
+
 import { useTheme } from '../../theme';
+
+import type { AppAppearanceMode } from '../../services/appAppearance';
 
 const APPEARANCE_OPTIONS: Array<{ id: AppAppearanceMode; label: string }> = [
   { id: 'light', label: 'Light' },
@@ -14,7 +16,10 @@ type SettingsAppearanceCardProps = {
   onChange: (mode: AppAppearanceMode) => void;
 };
 
-export function SettingsAppearanceCard({ mode, onChange }: SettingsAppearanceCardProps) {
+export function SettingsAppearanceCard({
+  mode,
+  onChange,
+}: SettingsAppearanceCardProps) {
   const { colors, typography } = useTheme();
 
   return (
@@ -25,8 +30,15 @@ export function SettingsAppearanceCard({ mode, onChange }: SettingsAppearanceCar
           backgroundColor: colors.surfaceContainerLowest,
           borderColor: colors.outlineVariant,
         },
-      ]}>
-      <Text style={[typography.caption, styles.fieldLabel, { color: colors.outline }]}>
+      ]}
+    >
+      <Text
+        style={[
+          typography.caption,
+          styles.fieldLabel,
+          { color: colors.outline },
+        ]}
+      >
         APP THEME
       </Text>
       <View style={styles.pillRow}>
@@ -41,23 +53,38 @@ export function SettingsAppearanceCard({ mode, onChange }: SettingsAppearanceCar
               style={[
                 styles.pill,
                 selected
-                  ? [styles.pillActive, { backgroundColor: colors.primaryContainer }]
+                  ? [
+                      styles.pillActive,
+                      { backgroundColor: colors.primaryContainer },
+                    ]
                   : { backgroundColor: colors.surfaceContainerLow },
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   typography.button,
-                  { color: selected ? colors.onPrimary : colors.onSurfaceVariant },
-                ]}>
+                  {
+                    color: selected
+                      ? colors.onPrimary
+                      : colors.onSurfaceVariant,
+                  },
+                ]}
+              >
                 {option.label}
               </Text>
             </Pressable>
           );
         })}
       </View>
-      <Text style={[typography.caption, styles.hint, { color: colors.onSurfaceVariant }]}>
-        Controls the library, settings, and navigation. Reader theme is set separately under
-        Reading Defaults.
+      <Text
+        style={[
+          typography.caption,
+          styles.hint,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
+        Controls the library, settings, and navigation. Reader theme is set
+        separately under Reading Defaults.
       </Text>
     </View>
   );

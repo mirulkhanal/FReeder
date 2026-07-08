@@ -54,9 +54,15 @@ export function ReaderToolbar({
   return (
     <Animated.View
       pointerEvents={visible ? 'box-none' : 'none'}
-      style={[styles.root, { opacity, transform: [{ translateY }] }]}>
+      style={[styles.root, { opacity, transform: [{ translateY }] }]}
+    >
       <Animated.View style={[styles.group, { backgroundColor }]}>
-        <ToolbarButton icon="list" label="Contents" iconColor={iconColor} onPress={wrap(onOpenToc)} />
+        <ToolbarButton
+          icon="list"
+          label="Contents"
+          iconColor={iconColor}
+          onPress={wrap(onOpenToc)}
+        />
         <ToolbarButton
           icon="search"
           label="Search"
@@ -99,13 +105,19 @@ type ToolbarButtonProps = {
   iconColor: string;
 };
 
-function ToolbarButton({ icon, label, onPress, iconColor }: ToolbarButtonProps) {
+function ToolbarButton({
+  icon,
+  label,
+  onPress,
+  iconColor,
+}: ToolbarButtonProps) {
   return (
     <Pressable
       accessibilityLabel={label}
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+      style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+    >
       <Icon name={icon} size={20} color={iconColor} />
     </Pressable>
   );

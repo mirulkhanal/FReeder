@@ -1,10 +1,16 @@
-import type { OpdsCatalog, OpdsFeed } from '../types/opds';
-import { parseOpdsFeed, parseOpenSearchDescription } from './opdsParser';
-import { isOpds2Json, parseOpds2Feed, parseOpds2SearchTemplate } from './opdsParser2';
-import type { OpdsSearchTemplate } from '../types/opds';
 import { encodeBase64 } from '../utils/base64';
-import { fetchHttpText } from './opdsHttp';
+
 import { loadCatalogPassword } from './opdsCredentials';
+import { fetchHttpText } from './opdsHttp';
+import { parseOpdsFeed, parseOpenSearchDescription } from './opdsParser';
+import {
+  isOpds2Json,
+  parseOpds2Feed,
+  parseOpds2SearchTemplate,
+} from './opdsParser2';
+
+import type { OpdsCatalog, OpdsFeed } from '../types/opds';
+import type { OpdsSearchTemplate } from '../types/opds';
 
 export function resolveOpdsUrl(baseUrl: string, href: string): string {
   if (href.startsWith('http://') || href.startsWith('https://')) {
@@ -13,7 +19,10 @@ export function resolveOpdsUrl(baseUrl: string, href: string): string {
   return new URL(href, baseUrl).toString();
 }
 
-function authHeader(catalog: OpdsCatalog, password?: string): Record<string, string> {
+function authHeader(
+  catalog: OpdsCatalog,
+  password?: string,
+): Record<string, string> {
   if (!catalog.username) {
     return {};
   }
@@ -27,9 +36,16 @@ async function catalogWithPassword(catalog: OpdsCatalog): Promise<OpdsCatalog> {
 }
 
 function requestHeaders(catalog: OpdsCatalog): Record<string, string> {
+  const version = catalog.opdsVersion ?? 'auto';
+  const accept =
+    version === '2'
+      ? 'application/opds+json, application/json, */*'
+      : version === '1'
+      ? 'application/atom+xml, application/xml, text/xml, application/opds+json, application/json, */*'
+      : 'application/opds+json, application/atom+xml, application/xml, text/xml, application/json, */*';
+
   return {
-    Accept:
-      'application/opds+json, application/atom+xml, application/xml, text/xml, application/json, */*',
+    Accept: accept,
     'User-Agent': 'FReeder/0.0.1 (OPDS)',
     ...authHeader(catalog, catalog.password),
   };
@@ -53,20 +69,34 @@ function describeFetchFailure(error: unknown, url: string): Error {
     const message = error.message.toLowerCase();
     if (isConnectionError(message)) {
       return new Error(
-        `Could not reach ${formatHost(url)}. On Tailscale, try the server's 100.x.x.x IP or full MagicDNS name (e.g. meebian.your-tailnet.ts.net:25600) instead of a short hostname. For Komga, add your username and password. Rebuild the app after installing updates — a Metro reload is not enough for network changes.`,
+        `Could not reach ${formatHost(
+          url,
+        )}. On Tailscale, try the server's 100.x.x.x IP or full MagicDNS name (e.g. meebian.your-tailnet.ts.net:25600) instead of a short hostname. For Komga, add your username and password. Rebuild the app after installing updates — a Metro reload is not enough for network changes.`,
       );
     }
   }
   return error instanceof Error ? error : new Error('Catalog request failed.');
 }
 
-function describeHttpFailure(status: number, url: string): Error {
+function describeHttpFailure(
+  status: number,
+  url: string,
+  catalog: OpdsCatalog,
+): Error {
   if (status === 401 || status === 403) {
     return new Error(
-      `Authentication failed (${status}) for ${formatHost(url)}. Edit the catalog and add your Komga username and password.`,
+      `Authentication failed (${status}) for ${formatHost(
+        url,
+      )}. Edit the catalog and add your Komga username and password.`,
     );
   }
-  return new Error(`Catalog request failed (${status}) for ${formatHost(url)}.`);
+  const versionHint =
+    catalog.opdsVersion && catalog.opdsVersion !== 'auto'
+      ? ` Try switching OPDS version from v${catalog.opdsVersion} to Auto in catalog settings.`
+      : ' If this is an OPDS 2 endpoint, try setting OPDS version to v2 in catalog settings.';
+  return new Error(
+    `Catalog request failed (${status}) for ${formatHost(url)}.${versionHint}`,
+  );
 }
 
 function formatHost(url: string): string {
@@ -90,7 +120,7 @@ export async function fetchOpdsXml(
   }
 
   if (response.status < 200 || response.status >= 300) {
-    throw describeHttpFailure(response.status, url);
+    throw describeHttpFailure(response.status, url, catalog);
   }
 
   return response.body;
@@ -115,8 +145,17 @@ export async function fetchOpdsFeed(
   url: string,
 ): Promise<OpdsFeed> {
   const body = await fetchOpdsXml(catalog, url);
+  const version = catalog.opdsVersion ?? 'auto';
+
+  if (version === '2') {
+    return parseOpds2Feed(body);
+  }
+  if (version === '1') {
+    return parseOpdsFeed(body);
+  }
+
   if (isOpds2Json(body)) {
-    return parseOpds2Feed(body, url);
+    return parseOpds2Feed(body);
   }
   return parseOpdsFeed(body);
 }
@@ -126,8 +165,18 @@ export async function fetchOpenSearchTemplate(
   descriptionUrl: string,
 ): Promise<OpdsSearchTemplate | null> {
   const body = await fetchOpdsXml(catalog, descriptionUrl);
+  const version = catalog.opdsVersion ?? 'auto';
+
+  if (version === '2') {
+    const feed = parseOpds2Feed(body);
+    return parseOpds2SearchTemplate(feed, descriptionUrl);
+  }
+  if (version === '1') {
+    return parseOpenSearchDescription(body);
+  }
+
   if (isOpds2Json(body)) {
-    const feed = parseOpds2Feed(body, descriptionUrl);
+    const feed = parseOpds2Feed(body);
     return parseOpds2SearchTemplate(feed, descriptionUrl);
   }
   return parseOpenSearchDescription(body);

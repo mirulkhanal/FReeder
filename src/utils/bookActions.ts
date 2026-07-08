@@ -1,6 +1,7 @@
-import { showThemedConfirm, showThemedDialog } from '../services/themedDialog';
 import { shareAnnotationsMarkdown } from '../services/annotationsExport';
 import { shareEpub as shareEpubFile } from '../services/bookShare';
+import { showThemedConfirm, showThemedDialog } from '../services/themedDialog';
+
 import type { Book } from '../types/book';
 
 type DeleteHandlers = {
@@ -15,15 +16,16 @@ export function promptDeleteBook(book: Book, handlers: DeleteHandlers): void {
     buttons: [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Remove from library', onPress: handlers.onRemoveFromLibrary },
-      { text: 'Delete from device', style: 'destructive', onPress: handlers.onDeleteFromDevice },
+      {
+        text: 'Delete from device',
+        style: 'destructive',
+        onPress: handlers.onDeleteFromDevice,
+      },
     ],
   });
 }
 
-export function promptRelocateBook(
-  book: Book,
-  onConfirm: () => void,
-): void {
+export function promptRelocateBook(book: Book, onConfirm: () => void): void {
   showThemedDialog({
     title: 'Locate book file',
     message: `"${book.title}" is missing from your library folder. Pick the EPUB file again to reconnect it. Your reading progress will be kept.`,

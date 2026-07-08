@@ -7,8 +7,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { Decoration } from 'react-native-readium';
+
 import { useTheme } from '../../theme';
+
+import type { Decoration } from 'react-native-readium';
 
 type ReaderHighlightsModalProps = {
   visible: boolean;
@@ -28,23 +30,50 @@ export function ReaderHighlightsModal({
   const { colors, typography } = useTheme();
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.header}>
-            <Text style={[typography.headline, { color: colors.onSurface }]}>Highlights</Text>
+            <Text style={[typography.headline, { color: colors.onSurface }]}>
+              Highlights
+            </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Close</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Close
+              </Text>
             </Pressable>
           </View>
 
-          <Text style={[typography.caption, styles.hint, { color: colors.onSurfaceVariant }]}>
-            Select text in the book and choose Highlight. Tap a highlight here to jump to it.
+          <Text
+            style={[
+              typography.caption,
+              styles.hint,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
+            Select text in the book and choose Highlight. Tap a highlight here
+            to jump to it.
           </Text>
 
           <ScrollView contentContainerStyle={styles.list}>
             {highlights.length === 0 ? (
-              <Text style={[typography.body, styles.empty, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[
+                  typography.body,
+                  styles.empty,
+                  { color: colors.onSurfaceVariant },
+                ]}
+              >
                 No highlights yet.
               </Text>
             ) : (
@@ -73,18 +102,24 @@ export function ReaderHighlightsModal({
                           : colors.surfaceContainerLow,
                         borderColor: colors.outlineVariant,
                       },
-                    ]}>
+                    ]}
+                  >
                     <View style={[styles.swatch, { backgroundColor: tint }]} />
                     <View style={styles.copy}>
                       <Text
                         numberOfLines={3}
-                        style={[typography.body, { color: colors.onSurface }]}>
+                        style={[typography.body, { color: colors.onSurface }]}
+                      >
                         {excerpt}
                       </Text>
                       {note ? (
                         <Text
                           numberOfLines={2}
-                          style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+                          style={[
+                            typography.caption,
+                            { color: colors.onSurfaceVariant },
+                          ]}
+                        >
                           {note}
                         </Text>
                       ) : null}

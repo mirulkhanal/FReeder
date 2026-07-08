@@ -45,7 +45,9 @@ export function isLegacyPathBookId(id: string | undefined | null): boolean {
 }
 
 export function generateBookId(): string {
-  return `book_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+  return `book_${Date.now().toString(36)}_${Math.random()
+    .toString(36)
+    .slice(2, 10)}`;
 }
 
 export function createBookFromScan(entry: {

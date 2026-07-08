@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import type { Book } from '../types/book';
 
 const FOLDER_KEY = '@freeder/libraryFolderUri';
@@ -29,7 +30,10 @@ function normalizeCachedBook(entry: unknown): Book | null {
     .trim();
 
   return {
-    id: typeof book.id === 'string' && book.id.length > 0 ? book.id : book.fileUrl,
+    id:
+      typeof book.id === 'string' && book.id.length > 0
+        ? book.id
+        : book.fileUrl,
     title: book.title?.trim() || fallbackTitle || 'Untitled',
     author: book.author,
     fileUrl: book.fileUrl,

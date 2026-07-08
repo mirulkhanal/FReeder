@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+
 import { useTheme } from '../theme';
 
 export type LibrarySort = 'title' | 'author' | 'recent' | 'added';
@@ -23,8 +24,15 @@ export function SortChips({ active, onChange }: SortChipsProps) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.row}>
-      <Text style={[typography.caption, styles.label, { color: colors.onSurfaceVariant }]}>
+      contentContainerStyle={styles.row}
+    >
+      <Text
+        style={[
+          typography.caption,
+          styles.label,
+          { color: colors.onSurfaceVariant },
+        ]}
+      >
         Sort
       </Text>
       {SORTS.map(sort => {
@@ -49,12 +57,14 @@ export function SortChips({ active, onChange }: SortChipsProps) {
                     borderWidth: 1,
                   },
               pressed && { opacity: 0.92 },
-            ]}>
+            ]}
+          >
             <Text
               style={[
                 typography.caption,
                 { color: isActive ? colors.primary : colors.onSurfaceVariant },
-              ]}>
+              ]}
+            >
               {sort.label}
             </Text>
           </Pressable>

@@ -1,5 +1,6 @@
-import type { Locator } from 'react-native-readium';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import type { Locator } from 'react-native-readium';
 
 const STORAGE_KEY = '@freeder/bookBookmarks';
 

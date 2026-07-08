@@ -2,7 +2,10 @@ import type { Link, Locator } from 'react-native-readium';
 
 export type TocLink = Link & { children?: TocLink[] };
 
-export function locatorForLink(link: Link, positions: Locator[]): Locator | null {
+export function locatorForLink(
+  link: Link,
+  positions: Locator[],
+): Locator | null {
   const href = link.href;
   const exact = positions.find(
     position =>
@@ -65,7 +68,10 @@ export function flattenTocLinks(links: TocLink[]): Link[] {
 
 function normalizeHref(href: string): string {
   try {
-    return decodeURIComponent(href).split('#')[0].replace(/^\.\//, '').replace(/^\/+/, '');
+    return decodeURIComponent(href)
+      .split('#')[0]
+      .replace(/^\.\//, '')
+      .replace(/^\/+/, '');
   } catch {
     return href.split('#')[0];
   }
@@ -105,7 +111,9 @@ function chapterFromReadingProgress(
       continue;
     }
 
-    const position = positions.find(entry => hrefMatches(entry.href, link.href));
+    const position = positions.find(entry =>
+      hrefMatches(entry.href, link.href),
+    );
     const progress =
       position?.locations?.totalProgression ?? position?.locations?.progression;
     if (progress == null) {

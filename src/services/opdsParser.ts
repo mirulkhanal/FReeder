@@ -1,4 +1,9 @@
-import type { OpdsEntry, OpdsFeed, OpdsLink, OpdsSearchTemplate } from '../types/opds';
+import type {
+  OpdsEntry,
+  OpdsFeed,
+  OpdsLink,
+  OpdsSearchTemplate,
+} from '../types/opds';
 
 const EPUB_TYPES = new Set([
   'application/epub+zip',
@@ -27,11 +32,15 @@ function decodeXmlEntities(value: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16)),
+    );
 }
 
 function stripTags(value: string): string {
-  return value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, '');
+  return value
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/<[^>]+>/g, '');
 }
 
 function parseAttributes(attrString: string): Record<string, string> {
@@ -47,7 +56,10 @@ function parseAttributes(attrString: string): Record<string, string> {
 
 function extractTagBlocks(xml: string, tagName: string): string[] {
   const blocks: string[] = [];
-  const regex = new RegExp(`<${tagName}(\\s[^>]*)?>([\\s\\S]*?)<\\/${tagName}>`, 'gi');
+  const regex = new RegExp(
+    `<${tagName}(\\s[^>]*)?>([\\s\\S]*?)<\\/${tagName}>`,
+    'gi',
+  );
   let match = regex.exec(xml);
   while (match) {
     blocks.push(match[0]);
@@ -146,7 +158,9 @@ export function parseOpdsFeed(xml: string): OpdsFeed {
   };
 }
 
-export function parseOpenSearchDescription(xml: string): OpdsSearchTemplate | null {
+export function parseOpenSearchDescription(
+  xml: string,
+): OpdsSearchTemplate | null {
   const urlBlocks = extractTagBlocks(xml, 'Url');
   for (const block of urlBlocks) {
     const openTag = block.match(/<Url\s+([^>]+)>/i)?.[1];
@@ -232,7 +246,9 @@ export function isDrmAcquisitionLink(link: OpdsLink): boolean {
 export function getThumbnailUrl(links: OpdsLink[]): string | undefined {
   const thumb = links.find(link => {
     const rel = link.rel.toLowerCase();
-    return rel === 'thumbnail' || rel === 'http://opds-spec.org/image/thumbnail';
+    return (
+      rel === 'thumbnail' || rel === 'http://opds-spec.org/image/thumbnail'
+    );
   });
   if (thumb) {
     return thumb.href;

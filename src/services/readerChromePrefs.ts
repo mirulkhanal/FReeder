@@ -30,12 +30,17 @@ export async function loadReaderChromePrefs(): Promise<ReaderChromePrefs> {
     return DEFAULT_READER_CHROME_PREFS;
   }
   try {
-    return { ...DEFAULT_READER_CHROME_PREFS, ...(JSON.parse(raw) as ReaderChromePrefs) };
+    return {
+      ...DEFAULT_READER_CHROME_PREFS,
+      ...(JSON.parse(raw) as ReaderChromePrefs),
+    };
   } catch {
     return DEFAULT_READER_CHROME_PREFS;
   }
 }
 
-export async function saveReaderChromePrefs(prefs: ReaderChromePrefs): Promise<void> {
+export async function saveReaderChromePrefs(
+  prefs: ReaderChromePrefs,
+): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
 }

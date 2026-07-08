@@ -1,13 +1,11 @@
-import { Share } from 'react-native';
 import { pick, types, keepLocalCopy } from '@react-native-documents/picker';
+import { Share } from 'react-native';
 import { FileSystem, Dirs } from 'react-native-file-access';
-import type { Book } from '../types/book';
-import { loadBookmarks } from './bookBookmarks';
-import { loadHighlights } from './bookAnnotations';
 
-function stripHtml(value: string): string {
-  return value.replace(/<[^>]+>/g, '').trim();
-}
+import { loadHighlights } from './bookAnnotations';
+import { loadBookmarks } from './bookBookmarks';
+
+import type { Book } from '../types/book';
 
 export async function buildAnnotationsMarkdown(book: Book): Promise<string> {
   const [bookmarks, highlights] = await Promise.all([
@@ -28,7 +26,9 @@ export async function buildAnnotationsMarkdown(book: Book): Promise<string> {
     lines.push('_No bookmarks._', '');
   } else {
     for (const bookmark of bookmarks) {
-      lines.push(`- ${bookmark.label} (${Math.round(bookmark.progress * 100)}%)`);
+      lines.push(
+        `- ${bookmark.label} (${Math.round(bookmark.progress * 100)}%)`,
+      );
     }
     lines.push('');
   }
@@ -59,7 +59,11 @@ export async function buildAnnotationsJson(book: Book): Promise<string> {
     loadBookmarks(book.id),
     loadHighlights(book.id),
   ]);
-  return JSON.stringify({ bookId: book.id, title: book.title, bookmarks, highlights }, null, 2);
+  return JSON.stringify(
+    { bookId: book.id, title: book.title, bookmarks, highlights },
+    null,
+    2,
+  );
 }
 
 export async function shareAnnotationsMarkdown(book: Book): Promise<void> {
@@ -70,13 +74,18 @@ export async function shareAnnotationsMarkdown(book: Book): Promise<void> {
   });
 }
 
-export async function exportAnnotationsToFile(book: Book, format: 'md' | 'json'): Promise<void> {
+export async function exportAnnotationsToFile(
+  book: Book,
+  format: 'md' | 'json',
+): Promise<void> {
   const ext = format === 'md' ? 'md' : 'json';
   const safeTitle = book.title.replace(/[^\w.\-() ]+/g, '_').trim() || 'book';
   const fileName = `${safeTitle}-annotations.${ext}`;
   const path = `${Dirs.CacheDir}/${Date.now()}_${fileName}`;
   const content =
-    format === 'md' ? await buildAnnotationsMarkdown(book) : await buildAnnotationsJson(book);
+    format === 'md'
+      ? await buildAnnotationsMarkdown(book)
+      : await buildAnnotationsJson(book);
   await FileSystem.writeFile(path, content, 'utf8');
   await Share.share({
     title: fileName,
@@ -107,5 +116,8 @@ export async function pickBackupFileUri(): Promise<string | null> {
     files: [{ uri: file.uri, fileName: file.name ?? 'freeder-backup.json' }],
     destination: 'cachesDirectory',
   });
-  return copy?.localUri ?? file.uri;
+  if (copy?.status === 'success' && copy.localUri) {
+    return copy.localUri;
+  }
+  return file.uri;
 }

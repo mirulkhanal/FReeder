@@ -1,9 +1,11 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../theme';
+
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 const TAB_ICONS: Record<string, string> = {
   LibraryTab: 'library-books',
@@ -30,7 +32,8 @@ export function SereneTabBar({ state, navigation }: BottomTabBarProps) {
             backgroundColor: colors.tabBar,
             paddingBottom: Math.max(insets.bottom, 12),
           },
-        ]}>
+        ]}
+      >
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;
           const iconName = TAB_ICONS[route.name] ?? 'circle';
@@ -56,7 +59,8 @@ export function SereneTabBar({ state, navigation }: BottomTabBarProps) {
               style={({ pressed }) => [
                 styles.tab,
                 pressed && styles.tabPressed,
-              ]}>
+              ]}
+            >
               <Icon
                 name={iconName}
                 size={24}
@@ -69,11 +73,14 @@ export function SereneTabBar({ state, navigation }: BottomTabBarProps) {
                     color: isFocused ? colors.primary : colors.onSurfaceVariant,
                     marginTop: 4,
                   },
-                ]}>
+                ]}
+              >
                 {label}
               </Text>
               {isFocused ? (
-                <View style={[styles.dot, { backgroundColor: colors.primary }]} />
+                <View
+                  style={[styles.dot, { backgroundColor: colors.primary }]}
+                />
               ) : (
                 <View style={styles.dotPlaceholder} />
               )}

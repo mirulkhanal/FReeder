@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,13 +12,30 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+
+import {
+  AddCatalogModal,
+  type CatalogFormValues,
+} from '../components/discover/AddCatalogModal';
 import { TabScreenLayout } from '../components/TabScreenLayout';
-import { AddCatalogModal, type CatalogFormValues } from '../components/discover/AddCatalogModal';
 import { useLibrary } from '../context/LibraryContext';
-import { fetchOpdsFeed, fetchOpenSearchTemplate, probeOpdsCatalog, resolveOpdsUrl } from '../services/opdsClient';
-import { downloadOpdsEntry, pickAcquisitionUrl } from '../services/opdsDownload';
+import { loadLibraryFolderUri } from '../services/libraryStorage';
+import {
+  fetchOpdsFeed,
+  fetchOpenSearchTemplate,
+  probeOpdsCatalog,
+  resolveOpdsUrl,
+} from '../services/opdsClient';
+import {
+  downloadOpdsEntry,
+  pickAcquisitionUrl,
+} from '../services/opdsDownload';
+import {
+  enqueueDownload,
+  subscribeDownloadQueue,
+  updateDownloadItem,
+  type DownloadQueueItem,
+} from '../services/opdsDownloadQueue';
 import {
   buildSearchUrl,
   getNavigationLinks,
@@ -32,19 +50,22 @@ import {
   updateOpdsCatalog,
   SUGGESTED_CATALOGS,
 } from '../services/opdsStorage';
-import { loadLibraryFolderUri } from '../services/libraryStorage';
-import {
-  enqueueDownload,
-  subscribeDownloadQueue,
-  updateDownloadItem,
-  type DownloadQueueItem,
-} from '../services/opdsDownloadQueue';
-import type { OpdsCatalog, OpdsEntry, OpdsFeed, OpdsSearchTemplate } from '../types/opds';
-import type { MainTabParamList } from '../navigation/types';
 import { showThemedAlert, showThemedDialog } from '../services/themedDialog';
 import { useTheme } from '../theme';
 
-type DiscoverNavigation = BottomTabNavigationProp<MainTabParamList, 'DiscoverTab'>;
+import type { MainTabParamList } from '../navigation/types';
+import type {
+  OpdsCatalog,
+  OpdsEntry,
+  OpdsFeed,
+  OpdsSearchTemplate,
+} from '../types/opds';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+
+type DiscoverNavigation = BottomTabNavigationProp<
+  MainTabParamList,
+  'DiscoverTab'
+>;
 
 type FeedState = {
   catalog: OpdsCatalog;
@@ -59,18 +80,23 @@ export function DiscoverScreen() {
 
   const [catalogs, setCatalogs] = useState<OpdsCatalog[]>([]);
   const [catalogModalVisible, setCatalogModalVisible] = useState(false);
-  const [editingCatalog, setEditingCatalog] = useState<OpdsCatalog | null>(null);
+  const [editingCatalog, setEditingCatalog] = useState<OpdsCatalog | null>(
+    null,
+  );
   const [feedState, setFeedState] = useState<FeedState | null>(null);
   const [feedStack, setFeedStack] = useState<FeedState[]>([]);
   const [feed, setFeed] = useState<OpdsFeed | null>(null);
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [searchTemplate, setSearchTemplate] = useState<OpdsSearchTemplate | null>(null);
+  const [searchTemplate, setSearchTemplate] =
+    useState<OpdsSearchTemplate | null>(null);
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<OpdsEntry | null>(null);
-  const [downloadingEntryId, setDownloadingEntryId] = useState<string | null>(null);
+  const [downloadingEntryId, setDownloadingEntryId] = useState<string | null>(
+    null,
+  );
   const [downloadQueue, setDownloadQueue] = useState<DownloadQueueItem[]>([]);
 
   useEffect(() => subscribeDownloadQueue(setDownloadQueue), []);
@@ -84,51 +110,49 @@ export function DiscoverScreen() {
     void refreshCatalogs();
   }, [refreshCatalogs]);
 
-  const loadFeed = useCallback(
-    async (state: FeedState, append = false) => {
-      if (append) {
-        setLoadingMore(true);
+  const loadFeed = useCallback(async (state: FeedState, append = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoadingFeed(true);
+      setFeedError(null);
+    }
+
+    try {
+      const nextFeed = await fetchOpdsFeed(state.catalog, state.url);
+      setFeed(prev => {
+        if (append && prev) {
+          return {
+            ...nextFeed,
+            entries: [...prev.entries, ...nextFeed.entries],
+          };
+        }
+        return nextFeed;
+      });
+
+      if (!append && nextFeed.searchDescriptionUrl) {
+        const template = await fetchOpenSearchTemplate(
+          state.catalog,
+          resolveOpdsUrl(state.url, nextFeed.searchDescriptionUrl),
+        );
+        setSearchTemplate(template);
+      } else if (!append) {
+        setSearchTemplate(null);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Could not load catalog.';
+      if (!append) {
+        setFeedError(message);
+        setFeed(null);
       } else {
-        setLoadingFeed(true);
-        setFeedError(null);
+        showThemedAlert('Could not load more', message);
       }
-
-      try {
-        const nextFeed = await fetchOpdsFeed(state.catalog, state.url);
-        setFeed(prev => {
-          if (append && prev) {
-            return {
-              ...nextFeed,
-              entries: [...prev.entries, ...nextFeed.entries],
-            };
-          }
-          return nextFeed;
-        });
-
-        if (!append && nextFeed.searchDescriptionUrl) {
-          const template = await fetchOpenSearchTemplate(
-            state.catalog,
-            resolveOpdsUrl(state.url, nextFeed.searchDescriptionUrl),
-          );
-          setSearchTemplate(template);
-        } else if (!append) {
-          setSearchTemplate(null);
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Could not load catalog.';
-        if (!append) {
-          setFeedError(message);
-          setFeed(null);
-        } else {
-          showThemedAlert('Could not load more', message);
-        }
-      } finally {
-        setLoadingFeed(false);
-        setLoadingMore(false);
-      }
-    },
-    [],
-  );
+    } finally {
+      setLoadingFeed(false);
+      setLoadingMore(false);
+    }
+  }, []);
 
   const openCatalog = useCallback(
     async (catalog: OpdsCatalog) => {
@@ -148,12 +172,12 @@ export function DiscoverScreen() {
 
   const openSuggested = useCallback(
     async (suggested: { title: string; url: string }) => {
-      const catalogs = await addOpdsCatalog({
+      const nextCatalogs = await addOpdsCatalog({
         title: suggested.title,
         url: suggested.url,
       });
-      setCatalogs(catalogs);
-      const catalog = catalogs.find(item => item.url === suggested.url);
+      setCatalogs(nextCatalogs);
+      const catalog = nextCatalogs.find(item => item.url === suggested.url);
       if (catalog) {
         await openCatalog(catalog);
       }
@@ -206,7 +230,10 @@ export function DiscoverScreen() {
           if (updated) {
             const probe = await probeOpdsCatalog(updated);
             if (!probe.ok) {
-              showThemedAlert('Catalog saved', probe.error ?? 'Could not verify the catalog URL.');
+              showThemedAlert(
+                'Catalog saved',
+                probe.error ?? 'Could not verify the catalog URL.',
+              );
             }
             await applyUpdatedCatalogToFeed(updated);
           }
@@ -216,6 +243,7 @@ export function DiscoverScreen() {
         const draft = {
           url: values.url.trim(),
           title: values.title.trim(),
+          opdsVersion: values.opdsVersion,
           username: values.username,
           password: values.password,
         };
@@ -223,11 +251,15 @@ export function DiscoverScreen() {
           id: 'probe',
           title: draft.title,
           url: draft.url,
+          opdsVersion: draft.opdsVersion,
           username: draft.username,
           password: values.password,
         });
         if (!probe.ok) {
-          showThemedAlert('Catalog unreachable', probe.error ?? 'Could not reach this OPDS URL.');
+          showThemedAlert(
+            'Catalog unreachable',
+            probe.error ?? 'Could not reach this OPDS URL.',
+          );
           return;
         }
 
@@ -238,8 +270,12 @@ export function DiscoverScreen() {
           await openCatalog(catalog);
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Could not save catalog.';
-        showThemedAlert(editingCatalog ? 'Update failed' : 'Add catalog failed', message);
+        const message =
+          error instanceof Error ? error.message : 'Could not save catalog.';
+        showThemedAlert(
+          editingCatalog ? 'Update failed' : 'Add catalog failed',
+          message,
+        );
       }
     },
     [applyUpdatedCatalogToFeed, editingCatalog, openCatalog],
@@ -301,7 +337,9 @@ export function DiscoverScreen() {
       setFeedState(previous);
       setSearchActive(false);
       setSearchQuery('');
-      void loadFeed(previous);
+      if (previous) {
+        void loadFeed(previous);
+      }
       return;
     }
     setFeedStack([]);
@@ -408,8 +446,13 @@ export function DiscoverScreen() {
           ],
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Download failed.';
-        updateDownloadItem(queueId, { status: 'error', error: message, progress: 0 });
+        const message =
+          error instanceof Error ? error.message : 'Download failed.';
+        updateDownloadItem(queueId, {
+          status: 'error',
+          error: message,
+          progress: 0,
+        });
         showThemedAlert('Download failed', message);
       } finally {
         setDownloadingEntryId(null);
@@ -426,19 +469,29 @@ export function DiscoverScreen() {
       <TabScreenLayout>
         <View style={styles.feedRoot}>
           <View style={styles.feedHeader}>
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={handleBack}>
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={handleBack}
+            >
               <Icon name="arrow-back" size={22} color={colors.onSurface} />
             </Pressable>
             <Text
               numberOfLines={1}
-              style={[typography.titleMd, styles.feedTitle, { color: colors.onSurface }]}>
+              style={[
+                typography.titleMd,
+                styles.feedTitle,
+                { color: colors.onSurface },
+              ]}
+            >
               {feed?.title ?? feedState.title}
             </Text>
             {searchTemplate ? (
               <Pressable
                 accessibilityRole="button"
                 hitSlop={8}
-                onPress={() => setSearchActive(value => !value)}>
+                onPress={() => setSearchActive(value => !value)}
+              >
                 <Icon name="search" size={22} color={colors.primary} />
               </Pressable>
             ) : null}
@@ -446,37 +499,58 @@ export function DiscoverScreen() {
               accessibilityLabel="Edit catalog"
               accessibilityRole="button"
               hitSlop={8}
-              onPress={() => openEditCatalogModal(feedState.catalog)}>
+              onPress={() => openEditCatalogModal(feedState.catalog)}
+            >
               <Icon name="edit" size={22} color={colors.onSurfaceVariant} />
             </Pressable>
             {!searchTemplate ? <View style={styles.headerSpacer} /> : null}
           </View>
 
           {downloadQueue.length > 0 ? (
-            <DownloadQueueBar items={downloadQueue} colors={colors} typography={typography} />
+            <DownloadQueueBar
+              items={downloadQueue}
+              colors={colors}
+              typography={typography}
+            />
           ) : null}
 
           {searchActive && searchTemplate ? (
             <View
               style={[
                 styles.searchRow,
-                { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant },
-              ]}>
+                {
+                  backgroundColor: colors.surfaceContainerLow,
+                  borderColor: colors.outlineVariant,
+                },
+              ]}
+            >
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
                 onChangeText={setSearchQuery}
-                onSubmitEditing={() => void handleSearch()}
+                onSubmitEditing={() => {
+                  void handleSearch();
+                }}
                 placeholder="Search catalog"
                 placeholderTextColor={colors.onSurfaceVariant}
                 returnKeyType="search"
-                style={[typography.body, styles.searchInput, { color: colors.onSurface }]}
+                style={[
+                  typography.body,
+                  styles.searchInput,
+                  { color: colors.onSurface },
+                ]}
                 value={searchQuery}
               />
               <Pressable
                 accessibilityRole="button"
-                onPress={() => void handleSearch()}
-                style={[styles.searchButton, { backgroundColor: colors.primary }]}>
+                onPress={() => {
+                  void handleSearch();
+                }}
+                style={[
+                  styles.searchButton,
+                  { backgroundColor: colors.primary },
+                ]}
+              >
                 <Icon name="arrow-forward" size={18} color={colors.onPrimary} />
               </Pressable>
             </View>
@@ -485,13 +559,20 @@ export function DiscoverScreen() {
           {loadingFeed ? (
             <View style={styles.centered}>
               <ActivityIndicator color={colors.primary} size="large" />
-              <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>
+              <Text
+                style={[typography.body, { color: colors.onSurfaceVariant }]}
+              >
                 Loading catalog…
               </Text>
             </View>
           ) : feedError ? (
             <View style={styles.centered}>
-              <Text style={[typography.body, { color: colors.onSurfaceVariant, textAlign: 'center' }]}>
+              <Text
+                style={[
+                  typography.body,
+                  { color: colors.onSurfaceVariant, textAlign: 'center' },
+                ]}
+              >
                 {feedError}
               </Text>
             </View>
@@ -499,14 +580,22 @@ export function DiscoverScreen() {
             <ScrollView contentContainerStyle={styles.feedContent}>
               {navigationLinks.length > 0 ? (
                 <View style={styles.section}>
-                  <Text style={[typography.caption, styles.sectionLabel, { color: colors.outline }]}>
+                  <Text
+                    style={[
+                      typography.caption,
+                      styles.sectionLabel,
+                      { color: colors.outline },
+                    ]}
+                  >
                     BROWSE
                   </Text>
                   {navigationLinks.map((link, index) => (
                     <Pressable
                       key={`${link.href}-${index}`}
                       accessibilityRole="button"
-                      onPress={() => void openNavigation(link.href, link.title)}
+                      onPress={() => {
+                        void openNavigation(link.href, link.title);
+                      }}
                       style={({ pressed }) => [
                         styles.row,
                         {
@@ -515,25 +604,50 @@ export function DiscoverScreen() {
                             : colors.surfaceContainerLow,
                           borderColor: colors.outlineVariant,
                         },
-                      ]}>
-                      <Icon name="folder-open" size={20} color={colors.primary} />
+                      ]}
+                    >
+                      <Icon
+                        name="folder-open"
+                        size={20}
+                        color={colors.primary}
+                      />
                       <Text
                         numberOfLines={2}
-                        style={[typography.body, styles.rowTitle, { color: colors.onSurface }]}>
+                        style={[
+                          typography.body,
+                          styles.rowTitle,
+                          { color: colors.onSurface },
+                        ]}
+                      >
                         {link.title}
                       </Text>
-                      <Icon name="chevron-right" size={20} color={colors.onSurfaceVariant} />
+                      <Icon
+                        name="chevron-right"
+                        size={20}
+                        color={colors.onSurfaceVariant}
+                      />
                     </Pressable>
                   ))}
                 </View>
               ) : null}
 
               <View style={styles.section}>
-                <Text style={[typography.caption, styles.sectionLabel, { color: colors.outline }]}>
+                <Text
+                  style={[
+                    typography.caption,
+                    styles.sectionLabel,
+                    { color: colors.outline },
+                  ]}
+                >
                   BOOKS
                 </Text>
                 {publications.length === 0 ? (
-                  <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>
+                  <Text
+                    style={[
+                      typography.body,
+                      { color: colors.onSurfaceVariant },
+                    ]}
+                  >
                     No downloadable EPUBs on this page.
                   </Text>
                 ) : (
@@ -545,7 +659,9 @@ export function DiscoverScreen() {
                       entry={entry}
                       colors={colors}
                       typography={typography}
-                      onDownload={() => void handleDownloadEntry(entry)}
+                      onDownload={() => {
+                        void handleDownloadEntry(entry);
+                      }}
                       onPress={() => setSelectedEntry(entry)}
                     />
                   ))
@@ -568,11 +684,19 @@ export function DiscoverScreen() {
                     setFeedState(nextState);
                     void loadFeed(nextState, true);
                   }}
-                  style={[styles.loadMore, { borderColor: colors.outlineVariant }]}>
+                  style={[
+                    styles.loadMore,
+                    { borderColor: colors.outlineVariant },
+                  ]}
+                >
                   {loadingMore ? (
                     <ActivityIndicator color={colors.primary} />
                   ) : (
-                    <Text style={[typography.button, { color: colors.primary }]}>Load more</Text>
+                    <Text
+                      style={[typography.button, { color: colors.primary }]}
+                    >
+                      Load more
+                    </Text>
                   )}
                 </Pressable>
               ) : null}
@@ -582,7 +706,9 @@ export function DiscoverScreen() {
           <EntryDetailModal
             baseUrl={feedState.url}
             colors={colors}
-            downloading={selectedEntry != null && downloadingEntryId === selectedEntry.id}
+            downloading={
+              selectedEntry != null && downloadingEntryId === selectedEntry.id
+            }
             entry={selectedEntry}
             onClose={() => setSelectedEntry(null)}
             onDownload={() => {
@@ -596,7 +722,9 @@ export function DiscoverScreen() {
           <AddCatalogModal
             catalog={editingCatalog}
             onClose={closeCatalogModal}
-            onSubmit={values => void handleSaveCatalog(values)}
+            onSubmit={values => {
+              void handleSaveCatalog(values);
+            }}
             visible={catalogModalVisible}
           />
         </View>
@@ -606,59 +734,108 @@ export function DiscoverScreen() {
 
   return (
     <TabScreenLayout>
-      <ScrollView contentContainerStyle={styles.homeContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.homeContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.intro}>
-          <Text style={[typography.displayTitle, { color: colors.onSurface }]}>Discover</Text>
-          <Text style={[typography.body, styles.lead, { color: colors.onSurfaceVariant }]}>
-            Browse OPDS catalogs and download DRM-free EPUBs into your local library.
+          <Text style={[typography.displayTitle, { color: colors.onSurface }]}>
+            Discover
+          </Text>
+          <Text
+            style={[
+              typography.body,
+              styles.lead,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
+            Browse OPDS catalogs and download DRM-free EPUBs into your local
+            library.
           </Text>
         </View>
 
         {downloadQueue.length > 0 ? (
-          <DownloadQueueBar items={downloadQueue} colors={colors} typography={typography} />
+          <DownloadQueueBar
+            items={downloadQueue}
+            colors={colors}
+            typography={typography}
+          />
         ) : null}
 
         <Pressable
           accessibilityRole="button"
           onPress={openAddCatalogModal}
-          style={[styles.addButton, { backgroundColor: colors.primary }]}>
+          style={[styles.addButton, { backgroundColor: colors.primary }]}
+        >
           <Icon name="add" size={20} color={colors.onPrimary} />
-          <Text style={[typography.button, { color: colors.onPrimary }]}>Add catalog</Text>
+          <Text style={[typography.button, { color: colors.onPrimary }]}>
+            Add catalog
+          </Text>
         </Pressable>
 
         {catalogs.length > 0 ? (
           <View style={styles.section}>
-            <Text style={[typography.caption, styles.sectionLabel, { color: colors.outline }]}>
+            <Text
+              style={[
+                typography.caption,
+                styles.sectionLabel,
+                { color: colors.outline },
+              ]}
+            >
               YOUR CATALOGS
             </Text>
             {catalogs.map(catalog => (
               <View
                 key={catalog.id}
-                style={[styles.catalogRow, { borderColor: colors.outlineVariant }]}>
+                style={[
+                  styles.catalogRow,
+                  { borderColor: colors.outlineVariant },
+                ]}
+              >
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => void openCatalog(catalog)}
+                  onPress={() => {
+                    void openCatalog(catalog);
+                  }}
                   style={({ pressed }) => [
                     styles.catalogBody,
                     pressed && { backgroundColor: colors.surfaceContainerHigh },
-                  ]}>
-                  <Icon name="cloud-download" size={22} color={colors.primary} />
+                  ]}
+                >
+                  <Icon
+                    name="cloud-download"
+                    size={22}
+                    color={colors.primary}
+                  />
                   <View style={styles.catalogCopy}>
-                    <Text style={[typography.body, { color: colors.onSurface }]}>{catalog.title}</Text>
+                    <Text
+                      style={[typography.body, { color: colors.onSurface }]}
+                    >
+                      {catalog.title}
+                    </Text>
                     <Text
                       numberOfLines={1}
-                      style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+                      style={[
+                        typography.caption,
+                        { color: colors.onSurfaceVariant },
+                      ]}
+                    >
                       {catalog.url}
                     </Text>
                   </View>
-                  <Icon name="chevron-right" size={20} color={colors.onSurfaceVariant} />
+                  <Icon
+                    name="chevron-right"
+                    size={20}
+                    color={colors.onSurfaceVariant}
+                  />
                 </Pressable>
                 <Pressable
                   accessibilityLabel="Edit catalog"
                   accessibilityRole="button"
                   hitSlop={8}
                   onPress={() => openEditCatalogModal(catalog)}
-                  style={styles.catalogAction}>
+                  style={styles.catalogAction}
+                >
                   <Icon name="edit" size={20} color={colors.onSurfaceVariant} />
                 </Pressable>
                 <Pressable
@@ -666,8 +843,13 @@ export function DiscoverScreen() {
                   accessibilityRole="button"
                   hitSlop={8}
                   onPress={() => handleRemoveCatalog(catalog)}
-                  style={styles.catalogAction}>
-                  <Icon name="delete-outline" size={20} color={colors.onSurfaceVariant} />
+                  style={styles.catalogAction}
+                >
+                  <Icon
+                    name="delete-outline"
+                    size={20}
+                    color={colors.onSurfaceVariant}
+                  />
                 </Pressable>
               </View>
             ))}
@@ -675,14 +857,22 @@ export function DiscoverScreen() {
         ) : null}
 
         <View style={styles.section}>
-          <Text style={[typography.caption, styles.sectionLabel, { color: colors.outline }]}>
+          <Text
+            style={[
+              typography.caption,
+              styles.sectionLabel,
+              { color: colors.outline },
+            ]}
+          >
             SUGGESTED
           </Text>
           {SUGGESTED_CATALOGS.map(item => (
             <Pressable
               key={item.url}
               accessibilityRole="button"
-              onPress={() => void openSuggested(item)}
+              onPress={() => {
+                void openSuggested(item);
+              }}
               style={({ pressed }) => [
                 styles.row,
                 {
@@ -691,12 +881,23 @@ export function DiscoverScreen() {
                     : colors.surfaceContainerLow,
                   borderColor: colors.outlineVariant,
                 },
-              ]}>
+              ]}
+            >
               <Icon name="auto-stories" size={20} color={colors.primary} />
-              <Text style={[typography.body, styles.rowTitle, { color: colors.onSurface }]}>
+              <Text
+                style={[
+                  typography.body,
+                  styles.rowTitle,
+                  { color: colors.onSurface },
+                ]}
+              >
                 {item.title}
               </Text>
-              <Icon name="chevron-right" size={20} color={colors.onSurfaceVariant} />
+              <Icon
+                name="chevron-right"
+                size={20}
+                color={colors.onSurfaceVariant}
+              />
             </Pressable>
           ))}
         </View>
@@ -705,7 +906,9 @@ export function DiscoverScreen() {
       <AddCatalogModal
         catalog={editingCatalog}
         onClose={closeCatalogModal}
-        onSubmit={values => void handleSaveCatalog(values)}
+        onSubmit={values => {
+          void handleSaveCatalog(values);
+        }}
         visible={catalogModalVisible}
       />
     </TabScreenLayout>
@@ -741,25 +944,46 @@ function EntryRow({
           backgroundColor: colors.surfaceContainerLow,
           borderColor: colors.outlineVariant,
         },
-      ]}>
-      <Pressable accessibilityRole="button" onPress={onPress} style={styles.entryMain}>
+      ]}
+    >
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={styles.entryMain}
+      >
         {thumb ? (
           <Image source={{ uri: thumb }} style={styles.thumb} />
         ) : (
-          <View style={[styles.thumbPlaceholder, { backgroundColor: colors.surfaceContainer }]}>
+          <View
+            style={[
+              styles.thumbPlaceholder,
+              { backgroundColor: colors.surfaceContainer },
+            ]}
+          >
             <Icon name="menu-book" size={22} color={colors.outline} />
           </View>
         )}
         <View style={styles.entryCopy}>
-          <Text numberOfLines={2} style={[typography.body, { color: colors.onSurface }]}>
+          <Text
+            numberOfLines={2}
+            style={[typography.body, { color: colors.onSurface }]}
+          >
             {entry.title}
           </Text>
           {entry.author ? (
-            <Text numberOfLines={1} style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+            <Text
+              numberOfLines={1}
+              style={[typography.caption, { color: colors.onSurfaceVariant }]}
+            >
               {entry.author}
             </Text>
           ) : null}
-          <Text style={[typography.caption, { color: canDownload ? colors.primary : colors.outline }]}>
+          <Text
+            style={[
+              typography.caption,
+              { color: canDownload ? colors.primary : colors.outline },
+            ]}
+          >
             {canDownload ? 'EPUB available' : 'No DRM-free EPUB'}
           </Text>
         </View>
@@ -774,10 +998,13 @@ function EntryRow({
           style={({ pressed }) => [
             styles.downloadIconButton,
             {
-              backgroundColor: pressed ? colors.primaryContainer : colors.surfaceContainerHigh,
+              backgroundColor: pressed
+                ? colors.primaryContainer
+                : colors.surfaceContainerHigh,
               opacity: downloading ? 0.6 : 1,
             },
-          ]}>
+          ]}
+        >
           {downloading ? (
             <ActivityIndicator color={colors.primary} size="small" />
           ) : (
@@ -817,24 +1044,50 @@ function EntryDetailModal({
   const canDownload = pickAcquisitionUrl(entry) != null;
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.modalBackdrop}>
-        <View style={[styles.modalSheet, { backgroundColor: colors.surfaceContainerLowest }]}>
+        <View
+          style={[
+            styles.modalSheet,
+            { backgroundColor: colors.surfaceContainerLowest },
+          ]}
+        >
           <View style={styles.modalHeader}>
-            <Text style={[typography.headline, { color: colors.onSurface }]}>Book details</Text>
+            <Text style={[typography.headline, { color: colors.onSurface }]}>
+              Book details
+            </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={[typography.button, { color: colors.primary }]}>Close</Text>
+              <Text style={[typography.button, { color: colors.primary }]}>
+                Close
+              </Text>
             </Pressable>
           </View>
 
-          {thumb ? <Image source={{ uri: thumb }} style={styles.detailCover} /> : null}
+          {thumb ? (
+            <Image source={{ uri: thumb }} style={styles.detailCover} />
+          ) : null}
 
-          <Text style={[typography.headline, { color: colors.onSurface }]}>{entry.title}</Text>
+          <Text style={[typography.headline, { color: colors.onSurface }]}>
+            {entry.title}
+          </Text>
           {entry.author ? (
-            <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>{entry.author}</Text>
+            <Text style={[typography.body, { color: colors.onSurfaceVariant }]}>
+              {entry.author}
+            </Text>
           ) : null}
           {entry.summary ? (
-            <Text style={[typography.body, styles.summary, { color: colors.onSurfaceVariant }]}>
+            <Text
+              style={[
+                typography.body,
+                styles.summary,
+                { color: colors.onSurfaceVariant },
+              ]}
+            >
               {entry.summary}
             </Text>
           ) : null}
@@ -846,15 +1099,20 @@ function EntryDetailModal({
             style={[
               styles.downloadButton,
               {
-                backgroundColor: canDownload ? colors.primary : colors.surfaceContainerHigh,
+                backgroundColor: canDownload
+                  ? colors.primary
+                  : colors.surfaceContainerHigh,
                 opacity: downloading ? 0.7 : 1,
               },
-            ]}>
+            ]}
+          >
             {downloading ? (
               <ActivityIndicator color={colors.onPrimary} />
             ) : (
               <Text style={[typography.button, { color: colors.onPrimary }]}>
-                {canDownload ? 'Download to books folder' : 'EPUB not available'}
+                {canDownload
+                  ? 'Download to books folder'
+                  : 'EPUB not available'}
               </Text>
             )}
           </Pressable>
@@ -873,7 +1131,9 @@ function DownloadQueueBar({
   colors: ReturnType<typeof useTheme>['colors'];
   typography: ReturnType<typeof useTheme>['typography'];
 }) {
-  const active = items.filter(item => item.status === 'queued' || item.status === 'downloading');
+  const active = items.filter(
+    item => item.status === 'queued' || item.status === 'downloading',
+  );
   const failed = items.filter(item => item.status === 'error');
   if (active.length === 0 && failed.length === 0) {
     return null;
@@ -885,43 +1145,65 @@ function DownloadQueueBar({
     current?.status === 'queued'
       ? 'Queued'
       : current?.status === 'downloading'
-        ? `Downloading… ${progress}%`
-        : current?.status === 'error'
-          ? 'Download failed'
-          : 'Done';
+      ? `Downloading… ${progress}%`
+      : current?.status === 'error'
+      ? 'Download failed'
+      : 'Done';
 
   return (
     <View
       style={[
         downloadQueueStyles.bar,
-        { backgroundColor: colors.surfaceContainerHigh, borderColor: colors.outlineVariant },
-      ]}>
+        {
+          backgroundColor: colors.surfaceContainerHigh,
+          borderColor: colors.outlineVariant,
+        },
+      ]}
+    >
       <View style={downloadQueueStyles.row}>
         {current?.status === 'downloading' || current?.status === 'queued' ? (
           <ActivityIndicator color={colors.primary} size="small" />
         ) : (
           <Icon
             color={current?.status === 'error' ? colors.error : colors.primary}
-            name={current?.status === 'error' ? 'error-outline' : 'check-circle'}
+            name={
+              current?.status === 'error' ? 'error-outline' : 'check-circle'
+            }
             size={20}
           />
         )}
         <View style={downloadQueueStyles.copy}>
-          <Text numberOfLines={1} style={[typography.titleMd, { color: colors.onSurface, fontSize: 15 }]}>
+          <Text
+            numberOfLines={1}
+            style={[
+              typography.titleMd,
+              { color: colors.onSurface, fontSize: 15 },
+            ]}
+          >
             {current?.title ?? 'Download'}
           </Text>
-          <Text style={[typography.caption, { color: colors.onSurfaceVariant }]}>
+          <Text
+            style={[typography.caption, { color: colors.onSurfaceVariant }]}
+          >
             {statusLabel}
             {active.length > 1 ? ` · +${active.length - 1} more` : ''}
           </Text>
         </View>
       </View>
       {current?.status === 'downloading' ? (
-        <View style={[downloadQueueStyles.track, { backgroundColor: colors.surfaceContainerHighest }]}>
+        <View
+          style={[
+            downloadQueueStyles.track,
+            { backgroundColor: colors.surfaceContainerHighest },
+          ]}
+        >
           <View
             style={[
               downloadQueueStyles.fill,
-              { backgroundColor: colors.primary, width: `${Math.max(8, progress)}%` },
+              {
+                backgroundColor: colors.primary,
+                width: `${Math.max(8, progress)}%`,
+              },
             ]}
           />
         </View>

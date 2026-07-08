@@ -1,15 +1,24 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+
+import { FindDuplicatesModal } from '../components/settings/FindDuplicatesModal';
 import { SettingsAboutSection } from '../components/settings/SettingsAboutSection';
 import { SettingsAppearanceCard } from '../components/settings/SettingsAppearanceCard';
-import { SettingsLibraryCard } from '../components/settings/SettingsLibraryCard';
 import { SettingsDataCard } from '../components/settings/SettingsDataCard';
+import { SettingsLibraryCard } from '../components/settings/SettingsLibraryCard';
 import { SettingsReadingCard } from '../components/settings/SettingsReadingCard';
 import { SettingsSectionHeader } from '../components/settings/SettingsSectionHeader';
 import { SettingsStatisticsCard } from '../components/settings/SettingsStatisticsCard';
-import { FindDuplicatesModal } from '../components/settings/FindDuplicatesModal';
 import { TabScreenLayout } from '../components/TabScreenLayout';
 import { useLibrary } from '../context/LibraryContext';
+import { exportFullBackupToShare } from '../services/annotationsExport';
+import {
+  exportLocalAppBackup,
+  exportAppBackupToFile,
+  pickAndImportAppBackup,
+  restoreLocalAppBackup,
+} from '../services/appBackup';
+import { loadAllHighlightsMap } from '../services/bookAnnotations';
 import {
   DEFAULT_READER_PREFERENCES,
   loadReaderPreferences,
@@ -18,27 +27,26 @@ import {
   type ReaderPreferences,
 } from '../services/readerPreferences';
 import {
-  exportLocalAppBackup,
-  exportAppBackupToFile,
-  pickAndImportAppBackup,
-  restoreLocalAppBackup,
-} from '../services/appBackup';
-import { exportFullBackupToShare } from '../services/annotationsExport';
-import { loadAllHighlightsMap } from '../services/bookAnnotations';
-import {
   loadReadingStatistics,
   type ReadingStatistics,
 } from '../services/readingStatistics';
 import { showThemedAlert, showThemedDialog } from '../services/themedDialog';
 import { useTheme } from '../theme';
+
 import type { Book } from '../types/book';
 
 const APP_VERSION = '0.0.1';
 
 export function SettingsScreen() {
   const { colors, typography, appearanceMode, setAppearanceMode } = useTheme();
-  const { books, folderUri, clearLibrary, refreshLibrary, reextractCovers, removeBook } =
-    useLibrary();
+  const {
+    books,
+    folderUri,
+    clearLibrary,
+    refreshLibrary,
+    reextractCovers,
+    removeBook,
+  } = useLibrary();
   const [preferences, setPreferences] = useState<ReaderPreferences>(
     DEFAULT_READER_PREFERENCES,
   );
@@ -58,7 +66,8 @@ export function SettingsScreen() {
   const handleResetReading = useCallback(() => {
     showThemedDialog({
       title: 'Reset reading settings?',
-      message: 'Restore theme, fonts, layout, and reading mode to FReeder defaults.',
+      message:
+        'Restore theme, fonts, layout, and reading mode to FReeder defaults.',
       buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -137,7 +146,10 @@ export function SettingsScreen() {
         lines.push('');
       }
     }
-    await Share.share({ title: 'FReeder highlights', message: lines.join('\n') });
+    await Share.share({
+      title: 'FReeder highlights',
+      message: lines.join('\n'),
+    });
   }, []);
 
   const handleFindDuplicates = useCallback(() => {
@@ -155,11 +167,16 @@ export function SettingsScreen() {
     void (async () => {
       try {
         await refreshLibrary();
-        showThemedAlert('Library refreshed', 'Your library folder was scanned again.');
+        showThemedAlert(
+          'Library refreshed',
+          'Your library folder was scanned again.',
+        );
       } catch (error) {
         showThemedAlert(
           'Refresh failed',
-          error instanceof Error ? error.message : 'Could not refresh the library folder.',
+          error instanceof Error
+            ? error.message
+            : 'Could not refresh the library folder.',
         );
       }
     })();
@@ -167,18 +184,26 @@ export function SettingsScreen() {
 
   const handleReextractCovers = useCallback(() => {
     reextractCovers();
-    showThemedAlert('Re-extracting covers', 'Missing covers will be fetched in the background.');
+    showThemedAlert(
+      'Re-extracting covers',
+      'Missing covers will be fetched in the background.',
+    );
   }, [reextractCovers]);
 
   const handleClearLibrary = useCallback(() => {
     if (books.length === 0) {
-      showThemedAlert('Library is empty', 'There are no books to remove from FReeder.');
+      showThemedAlert(
+        'Library is empty',
+        'There are no books to remove from FReeder.',
+      );
       return;
     }
 
     showThemedDialog({
       title: 'Clear library?',
-      message: `Remove all ${books.length} book${books.length === 1 ? '' : 's'} from FReeder? Your EPUB files on this device will not be deleted.`,
+      message: `Remove all ${books.length} book${
+        books.length === 1 ? '' : 's'
+      } from FReeder? Your EPUB files on this device will not be deleted.`,
       buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -194,7 +219,9 @@ export function SettingsScreen() {
               })
               .catch(error => {
                 const message =
-                  error instanceof Error ? error.message : 'Could not clear the library.';
+                  error instanceof Error
+                    ? error.message
+                    : 'Could not clear the library.';
                 showThemedAlert('Clear library failed', message);
               });
           },
@@ -207,18 +234,30 @@ export function SettingsScreen() {
     <TabScreenLayout>
       <ScrollView
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.intro}>
-          <Text style={[typography.displayTitle, { color: colors.onSurface }]}>Settings</Text>
-          <Text style={[typography.body, styles.lead, { color: colors.onSurfaceVariant }]}>
-            FReeder is a local-first EPUB reader designed for eye comfort. Your library and
-            progress stay securely on your device.
+          <Text style={[typography.displayTitle, { color: colors.onSurface }]}>
+            Settings
+          </Text>
+          <Text
+            style={[
+              typography.body,
+              styles.lead,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
+            FReeder is a local-first EPUB reader designed for eye comfort. Your
+            library and progress stay securely on your device.
           </Text>
         </View>
 
         <View style={styles.block}>
           <SettingsSectionHeader icon="dark-mode" title="Appearance" />
-          <SettingsAppearanceCard mode={appearanceMode} onChange={setAppearanceMode} />
+          <SettingsAppearanceCard
+            mode={appearanceMode}
+            onChange={setAppearanceMode}
+          />
         </View>
 
         <View style={styles.block}>
@@ -247,7 +286,11 @@ export function SettingsScreen() {
         </View>
 
         <View style={styles.block}>
-          <SettingsSectionHeader icon="warning" title="Library Management" iconColor="#ba1a1a" />
+          <SettingsSectionHeader
+            icon="warning"
+            title="Library Management"
+            iconColor="#ba1a1a"
+          />
           <SettingsLibraryCard
             hasLibraryFolder={Boolean(folderUri)}
             onClearLibrary={handleClearLibrary}

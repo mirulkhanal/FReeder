@@ -17,12 +17,17 @@ function isKeychainAvailable(): boolean {
   return NativeModules.RNKeychainManager != null;
 }
 
-async function loadFallbackPassword(catalogId: string): Promise<string | undefined> {
+async function loadFallbackPassword(
+  catalogId: string,
+): Promise<string | undefined> {
   const raw = await AsyncStorage.getItem(fallbackKey(catalogId));
   return raw ?? undefined;
 }
 
-async function saveFallbackPassword(catalogId: string, password: string): Promise<void> {
+async function saveFallbackPassword(
+  catalogId: string,
+  password: string,
+): Promise<void> {
   await AsyncStorage.setItem(fallbackKey(catalogId), password);
 }
 
@@ -55,7 +60,9 @@ export async function saveCatalogPassword(
   await saveFallbackPassword(catalogId, password);
 }
 
-export async function loadCatalogPassword(catalogId: string): Promise<string | undefined> {
+export async function loadCatalogPassword(
+  catalogId: string,
+): Promise<string | undefined> {
   if (isKeychainAvailable()) {
     try {
       const credentials = await Keychain.getGenericPassword({
@@ -75,7 +82,9 @@ export async function loadCatalogPassword(catalogId: string): Promise<string | u
 export async function clearCatalogPassword(catalogId: string): Promise<void> {
   if (isKeychainAvailable()) {
     try {
-      await Keychain.resetGenericPassword({ service: serviceForCatalog(catalogId) });
+      await Keychain.resetGenericPassword({
+        service: serviceForCatalog(catalogId),
+      });
     } catch {
       // Best-effort Keychain clear.
     }
