@@ -657,6 +657,7 @@ export async function isCoverUriValid(coverUri?: string): Promise<boolean> {
   return isValidCoverFile(stripFileScheme(coverUri));
 }
 
+/* eslint-disable no-bitwise -- Base64 codec relies on bit operations. */
 function base64ToUint8Array(base64: string): Uint8Array {
   const chars =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -711,6 +712,7 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
 
   return result;
 }
+/* eslint-enable no-bitwise */
 
 function bytesToText(bytes: Uint8Array): string {
   const chunkSize = 0x8000;
