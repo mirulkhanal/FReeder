@@ -183,11 +183,21 @@ export function SettingsScreen() {
   }, [refreshLibrary]);
 
   const handleReextractCovers = useCallback(() => {
-    reextractCovers();
-    showThemedAlert(
-      'Re-extracting covers',
-      'Missing covers will be fetched in the background.',
-    );
+    void reextractCovers().then(count => {
+      if (count === 0) {
+        showThemedAlert(
+          'Covers up to date',
+          'Every book already has a valid cover on disk.',
+        );
+        return;
+      }
+      showThemedAlert(
+        'Re-extracting covers',
+        `Re-extracting covers for ${count} book${
+          count === 1 ? '' : 's'
+        } in the background.`,
+      );
+    });
   }, [reextractCovers]);
 
   const handleClearLibrary = useCallback(() => {
