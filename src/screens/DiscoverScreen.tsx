@@ -131,11 +131,16 @@ export function DiscoverScreen() {
       });
 
       if (!append && nextFeed.searchDescriptionUrl) {
-        const template = await fetchOpenSearchTemplate(
-          state.catalog,
-          resolveOpdsUrl(state.url, nextFeed.searchDescriptionUrl),
-        );
-        setSearchTemplate(template);
+        try {
+          const template = await fetchOpenSearchTemplate(
+            state.catalog,
+            resolveOpdsUrl(state.url, nextFeed.searchDescriptionUrl),
+          );
+          setSearchTemplate(template);
+        } catch {
+          // OpenSearch is optional — a bad OSD URL must not fail the catalog.
+          setSearchTemplate(null);
+        }
       } else if (!append) {
         setSearchTemplate(null);
       }
@@ -177,7 +182,8 @@ export function DiscoverScreen() {
         url: suggested.url,
       });
       setCatalogs(nextCatalogs);
-      const catalog = nextCatalogs.find(item => item.url === suggested.url);
+      // addOpdsCatalog normalizes the URL; don't compare to the raw suggested form.
+      const catalog = nextCatalogs[0];
       if (catalog) {
         await openCatalog(catalog);
       }
@@ -265,7 +271,7 @@ export function DiscoverScreen() {
 
         const next = await addOpdsCatalog(values);
         setCatalogs(next);
-        const catalog = next.find(item => item.url === values.url.trim());
+        const catalog = next[0];
         if (catalog) {
           await openCatalog(catalog);
         }

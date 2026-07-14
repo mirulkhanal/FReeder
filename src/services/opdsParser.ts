@@ -178,12 +178,46 @@ export function parseOpenSearchDescription(
   return null;
 }
 
+/** True when a link type advertises another OPDS catalog/feed. */
+export function isCatalogFeedType(type?: string): boolean {
+  const normalized = type?.toLowerCase() ?? '';
+  return (
+    normalized.includes('opds-catalog') ||
+    normalized.includes('profile=opds') ||
+    normalized.includes('application/opds+json') ||
+    (normalized.includes('application/atom+xml') &&
+      !normalized.includes('entry'))
+  );
+}
+
+/**
+ * Navigation vs publication is an OPDS convention, not server-specific.
+ * Many servers (e.g. Jellyfin) omit `rel` and only set a catalog MIME type.
+ */
 export function isNavigationLink(link: OpdsLink): boolean {
   const rel = link.rel.toLowerCase();
   if (NAVIGATION_RELS.has(rel)) {
     return true;
   }
-  return rel.endsWith('/subsection') || rel === 'subsection';
+  if (rel.endsWith('/subsection') || rel === 'subsection') {
+    return true;
+  }
+  if ((!rel || rel === 'alternate') && isCatalogFeedType(link.type)) {
+    return true;
+  }
+  return false;
+}
+
+function isSkippableNonNavRel(rel: string): boolean {
+  const normalized = rel.toLowerCase();
+  return (
+    normalized === 'self' ||
+    normalized === 'start' ||
+    normalized === 'search' ||
+    normalized.includes('image') ||
+    normalized.includes('thumbnail') ||
+    normalized.includes('acquisition')
+  );
 }
 
 function humanizePathSegment(segment: string): string {
@@ -281,13 +315,25 @@ export function getNavigationLinks(feed: OpdsFeed): OpdsLink[] {
       continue;
     }
 
-    for (const link of entry.links) {
-      if (!isNavigationLink(link)) {
-        continue;
+    const explicitNav = entry.links.filter(isNavigationLink);
+    if (explicitNav.length > 0) {
+      for (const link of explicitNav) {
+        add({
+          ...link,
+          title: resolveNavigationTitle(link, entry),
+        });
       }
+      continue;
+    }
+
+    // Catalog entry with no acquisition + no subsection rel (Jellyfin, etc.):
+    // treat the primary feed link as navigation.
+    const fallback = entry.links.find(link => !isSkippableNonNavRel(link.rel));
+    if (fallback) {
       add({
-        ...link,
-        title: resolveNavigationTitle(link, entry),
+        ...fallback,
+        rel: fallback.rel || 'subsection',
+        title: resolveNavigationTitle(fallback, entry),
       });
     }
   }
