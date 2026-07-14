@@ -6,8 +6,7 @@ import {
   Util,
 } from 'react-native-file-access';
 
-import { encodeBase64 } from '../utils/base64';
-
+import { encodeBasicAuthToken } from './opdsAuth';
 import { resolveOpdsUrl } from './opdsClient';
 import { loadCatalogPassword } from './opdsCredentials';
 import { getAcquisitionLinks } from './opdsParser';
@@ -44,8 +43,10 @@ function requestHeaders(
     'User-Agent': 'FReeder/0.0.1 (OPDS)',
   };
   if (catalog.username) {
-    const token = encodeBase64(`${catalog.username}:${password ?? ''}`);
-    headers.Authorization = `Basic ${token}`;
+    headers.Authorization = `Basic ${encodeBasicAuthToken(
+      catalog.username,
+      password ?? '',
+    )}`;
   }
   return headers;
 }

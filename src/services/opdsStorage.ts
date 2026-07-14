@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { generateBookId } from '../types/book';
 
+import { normalizeCatalogEndpoint } from './opdsAuth';
 import {
   clearCatalogPassword,
   migrateCatalogPassword,
@@ -19,7 +20,7 @@ export const SUGGESTED_CATALOGS: Array<{ title: string; url: string }> = [
   },
   {
     title: 'Project Gutenberg',
-    url: 'https://www.gutenberg.org/ebooks.opds/?format=opds',
+    url: 'https://www.gutenberg.org/ebooks/search.opds/',
   },
   {
     title: 'Calibre Web (example)',
@@ -72,13 +73,14 @@ export async function addOpdsCatalog(
   input: Omit<OpdsCatalog, 'id'> & { id?: string },
 ): Promise<OpdsCatalog[]> {
   const catalogs = await loadOpdsCatalogs();
+  const endpoint = normalizeCatalogEndpoint(input.url);
   const catalog: OpdsCatalog = {
     id: input.id ?? generateBookId(),
-    title: input.title.trim() || catalogTitleFromUrl(input.url),
-    url: input.url.trim(),
+    title: input.title.trim() || catalogTitleFromUrl(endpoint.url),
+    url: endpoint.url,
     opdsVersion: input.opdsVersion ?? 'auto',
-    username: input.username?.trim() || undefined,
-    password: input.password || undefined,
+    username: input.username?.trim() || endpoint.username,
+    password: input.password || endpoint.password,
   };
   const next = [catalog, ...catalogs.filter(item => item.url !== catalog.url)];
   await saveOpdsCatalogs(next);
@@ -112,7 +114,8 @@ export async function updateOpdsCatalog(
     throw new Error('Catalog not found.');
   }
 
-  const url = input.url.trim();
+  const endpoint = normalizeCatalogEndpoint(input.url);
+  const url = endpoint.url;
   if (!url) {
     throw new Error('Catalog URL is required.');
   }
@@ -128,10 +131,10 @@ export async function updateOpdsCatalog(
     url,
     title: input.title.trim() || catalogTitleFromUrl(url),
     opdsVersion: input.opdsVersion,
-    username: input.username?.trim() || undefined,
+    username: input.username?.trim() || endpoint.username || undefined,
     password: input.keepExistingPassword
       ? existing.password
-      : input.password || undefined,
+      : input.password || endpoint.password || undefined,
   };
 
   const next = catalogs.map(catalog =>

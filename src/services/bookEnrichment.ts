@@ -16,6 +16,22 @@ import type { Book } from '../types/book';
 
 const ENRICH_CONCURRENCY = 1;
 
+/** Books with no coverUri, or a coverUri whose file is missing/invalid. */
+export async function filterBooksNeedingCoverEnrichment(
+  books: Book[],
+): Promise<Book[]> {
+  const results = await Promise.all(
+    books.map(async book => {
+      if (!book.coverUri) {
+        return book;
+      }
+      const valid = await isCoverUriValid(book.coverUri);
+      return valid ? null : book;
+    }),
+  );
+  return results.filter((book): book is Book => book != null);
+}
+
 export async function enrichBook(book: Book): Promise<Book> {
   await yieldToUi();
 
