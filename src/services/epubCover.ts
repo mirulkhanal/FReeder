@@ -6,7 +6,8 @@ import { yieldToUi } from '../utils/yieldToUi';
 
 import { resolveReadableBookUri } from './bookFile';
 
-const COVER_CACHE_DIR = `${Dirs.CacheDir}/covers`;
+// DocumentDir survives app restarts / OEM cache wipes; CacheDir does not.
+const COVER_CACHE_DIR = `${Dirs.DocumentDir}/freeder/covers`;
 const UNPACK_CACHE_DIR = `${Dirs.CacheDir}/epub_unpack`;
 const COVER_CACHE_VERSION = 'v2';
 const JSZIP_MAX_BYTES = 40 * 1024 * 1024;
@@ -584,6 +585,11 @@ async function extractMetadataFromReader(
 }
 
 async function ensureCoverCacheDir(): Promise<void> {
+  try {
+    await FileSystem.mkdir(`${Dirs.DocumentDir}/freeder`);
+  } catch {
+    // Directory already exists.
+  }
   try {
     await FileSystem.mkdir(COVER_CACHE_DIR);
   } catch {

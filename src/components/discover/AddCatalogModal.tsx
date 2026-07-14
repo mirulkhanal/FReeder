@@ -114,7 +114,7 @@ export function AddCatalogModal({
                 autoCorrect={false}
                 keyboardType="url"
                 onChangeText={setUrl}
-                placeholder="https://192.168.1.10:25600/opds/v1.2/catalog"
+                placeholder="http://192.168.1.10:8096/opds"
                 placeholderTextColor={colors.onSurfaceVariant}
                 style={[inputStyle(colors, typography), styles.input]}
                 value={url}
@@ -178,11 +178,7 @@ export function AddCatalogModal({
                 })}
               </View>
             </Field>
-            <Field
-              label="Username (optional)"
-              typography={typography}
-              colors={colors}
-            >
+            <Field label="Username" typography={typography} colors={colors}>
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -193,11 +189,7 @@ export function AddCatalogModal({
                 value={username}
               />
             </Field>
-            <Field
-              label="Password (optional)"
-              typography={typography}
-              colors={colors}
-            >
+            <Field label="Password" typography={typography} colors={colors}>
               <TextInput
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -222,10 +214,10 @@ export function AddCatalogModal({
               { color: colors.onSurfaceVariant },
             ]}
           >
-            Komga / Tailscale: use http://100.x.x.x:25600/opds/v1.2/catalog or
-            the full .ts.net hostname if a short name like meebian fails. Add
-            your Komga username and password when the server requires login. For
-            OPDS 2 feeds, switch version to v2 if auto-detect fails.
+            Jellyfin: http://host:8096/opds with your Jellyfin username and
+            password (the same prompt the browser shows). Komga:
+            http://host:25600/opds/v1.2/catalog. Leave version on Auto. Prefer a
+            Tailscale 100.x IP if a short hostname fails.
           </Text>
 
           <Pressable

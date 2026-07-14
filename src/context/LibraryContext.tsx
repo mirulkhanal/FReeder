@@ -20,7 +20,10 @@ import {
   deleteBookFromDevice,
   removeBookFromLibrary,
 } from '../services/bookDeletion';
-import { enrichBooksInBackground } from '../services/bookEnrichment';
+import {
+  enrichBooksInBackground,
+  filterBooksNeedingCoverEnrichment,
+} from '../services/bookEnrichment';
 import {
   bookFromPickedFile,
   mergeScannedWithLibrary,
@@ -46,7 +49,7 @@ type LibraryContextValue = {
   selectLibraryFolder: () => Promise<void>;
   importSingleBook: () => Promise<void>;
   refreshLibrary: () => Promise<void>;
-  reextractCovers: () => void;
+  reextractCovers: () => Promise<number>;
   deleteBook: (book: Book) => Promise<void>;
   removeBook: (book: Book) => Promise<void>;
   relocateBook: (book: Book) => Promise<void>;
@@ -155,7 +158,8 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     async (merged: Book[]) => {
       setBooks(merged);
       await saveCachedBooks(merged);
-      enrichBooks(merged.filter(book => !book.coverUri));
+      const needingCovers = await filterBooksNeedingCoverEnrichment(merged);
+      enrichBooks(needingCovers);
     },
     [enrichBooks],
   );
@@ -172,11 +176,26 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     [finalizeBooks],
   );
 
-  const reextractCovers = useCallback(() => {
-    const missing = booksRef.current.filter(book => !book.coverUri);
-    if (missing.length > 0) {
-      enrichBooks(missing);
+  const reextractCovers = useCallback(async () => {
+    const needingCovers = await filterBooksNeedingCoverEnrichment(
+      booksRef.current,
+    );
+    if (needingCovers.length > 0) {
+      const needingIds = new Set(needingCovers.map(book => book.id));
+      const cleared = needingCovers.map(book => ({
+        ...book,
+        coverUri: undefined,
+      }));
+      setBooks(current => {
+        const next = current.map(book =>
+          needingIds.has(book.id) ? { ...book, coverUri: undefined } : book,
+        );
+        void saveCachedBooks(next);
+        return next;
+      });
+      enrichBooks(cleared);
     }
+    return needingCovers.length;
   }, [enrichBooks]);
 
   const refreshLibrary = useCallback(async () => {
